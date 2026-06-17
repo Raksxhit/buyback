@@ -10,7 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
-        /* Universal Box Sizing to guarantee perfect alignments */
+        /* Universal Box Sizing */
         *, *::before, *::after { box-sizing: border-box; }
 
         :root {
@@ -45,6 +45,19 @@
         .main-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); width: 100%;}
         .header-title-block h1 { margin: 0; color: var(--primary); font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
         .header-title-block .subtitle { font-size: 13px; font-weight: 500; color: var(--text-muted); margin-top: 2px; }
+
+        /* Real-time Sync Indicator Styles */
+        .sync-wrapper { display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-color); }
+        .sync-dot { width: 8px; height: 8px; border-radius: 50%; background-color: var(--text-muted); transition: background-color 0.3s; }
+        .sync-dot.saved { background-color: var(--profit-color); }
+        .sync-dot.saving { background-color: #f59e0b; animation: syncPulse 1s infinite; }
+        .sync-dot.error { background-color: var(--loss-color); }
+        @keyframes syncPulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+        .sync-text { font-size: 12px; font-weight: 600; color: var(--text-muted); }
 
         /* Top Grid layout */
         .dashboard-top { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 24px; align-items: stretch; width: 100%; }
@@ -93,9 +106,7 @@
         .btn-save-primary { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 8px; width: 100%; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 24px; box-shadow: var(--shadow-sm); }
         .btn-save-primary:hover { background: var(--primary-light); transform: translateY(-1px); box-shadow: var(--shadow-md); }
 
-        /* =========================================
-           SCENARIO TABLE (Table 2)
-           ========================================= */
+        /* SCENARIO TABLE */
         .table-wrapper { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-color); background: #fff; box-shadow: var(--shadow-sm); flex-grow: 1; width: 100%; }
         #scenarioTable { width: 100%; border-collapse: separate; border-spacing: 0; text-align: right; font-size: 13px; }
         #scenarioTable th { padding: 12px 14px; white-space: nowrap; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); border-bottom: 1px solid var(--border-color); background-color: #f8fafc; }
@@ -118,9 +129,7 @@
         .badge-loss { background-color: #fee2e2; color: #991b1b; }
         .badge-neutral { background-color: #f1f5f9; color: var(--text-muted); }
 
-        /* =========================================
-           MATRIX TABLE (Table 3)
-           ========================================= */
+        /* MATRIX TABLE */
         .matrix-wrapper { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-color); background: #fff; box-shadow: var(--shadow-sm); width: 100%;}
         .matrix-table { width: 100%; border-collapse: separate; border-spacing: 0; }
         .matrix-table th { padding: 14px 12px; text-align: center; background-color: #f8fafc; color: var(--text-main); font-weight: 600; font-size: 13px; border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); }
@@ -168,11 +177,17 @@
                 <div class="subtitle">by Raksh</div>
             </div>
         </div>
+        <div class="header-right">
+            <div class="sync-wrapper" id="syncWrapper" style="display: none;">
+                <div class="sync-dot" id="syncDot"></div>
+                <span class="sync-text" id="syncText">Waiting...</span>
+            </div>
+        </div>
     </header>
 
     <div class="top-bar">
         <div class="scrip-input-container">
-            <input type="text" id="scripName" placeholder="Enter Scrip Name">
+            <input type="text" id="scripName" placeholder="Enter Scrip Name" oninput="calculateAll()">
         </div>
         <div class="summary-metric alt">
             <div class="metric-label">Hedge Spread</div>
@@ -227,14 +242,14 @@
                 <div class="input-group">
                     <label>Future Expiry</label>
                     <div class="input-control">
-                        <select id="expiryMonth">
+                        <select id="expiryMonth" onchange="calculateAll()">
                             <option value="Jan">Jan</option> <option value="Feb">Feb</option> <option value="Mar">Mar</option> <option value="Apr">Apr</option> <option value="May">May</option> <option value="Jun">Jun</option> <option value="Jul">Jul</option> <option value="Aug">Aug</option> <option value="Sep">Sep</option> <option value="Oct">Oct</option> <option value="Nov">Nov</option> <option value="Dec">Dec</option>
                         </select>
                     </div>
                 </div>
                 <div class="input-group">
                     <label>Lot Size</label>
-                    <div class="input-control"><input type="number" id="lotSize" placeholder="0" oninput="calculateAll()"></div>
+                    <div class="input-control"><input type="number" id="lotSize" placeholder="375" oninput="calculateAll()"></div>
                 </div>
             </div>
 
@@ -274,7 +289,7 @@
                 </div>
             </div>
 
-            <button class="btn-save-primary" id="btnSave" onclick="saveAnalysis()">Save Analysis to Cloud</button>
+            <button class="btn-save-primary" id="btnSave" onclick="saveAnalysis()">Save Report</button>
         </div>
 
         <div class="card">
@@ -364,6 +379,69 @@
     function closeSavedModal() { document.getElementById('savedModal').classList.remove('active'); }
 
     // ==========================================
+    // REAL-TIME SYNC LOGIC
+    // ==========================================
+    let autoSaveTimeout = null;
+
+    function updateSyncUI(state) {
+        const wrapper = document.getElementById('syncWrapper');
+        const dot = document.getElementById('syncDot');
+        const text = document.getElementById('syncText');
+        
+        wrapper.style.display = 'flex'; 
+
+        if (state === 'saving') {
+            dot.className = 'sync-dot saving';
+            text.innerText = 'Saving...';
+        } else if (state === 'saved') {
+            dot.className = 'sync-dot saved';
+            text.innerText = 'Saved to Cloud';
+        } else if (state === 'error') {
+            dot.className = 'sync-dot error';
+            text.innerText = 'Sync Error';
+        }
+    }
+
+    function triggerAutoSave() {
+        const scripNameInput = document.getElementById('scripName').value.trim();
+        if (!scripNameInput) return; 
+
+        updateSyncUI('saving');
+        
+        if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
+        
+        autoSaveTimeout = setTimeout(() => {
+            performSilentSave(scripNameInput);
+        }, 1000); 
+    }
+
+    function performSilentSave(scripNameInput) {
+        const docId = scripNameInput.toUpperCase();
+        const payload = {
+            name: scripNameInput, 
+            timestamp: Date.now(), 
+            numAccounts: document.getElementById('numAccounts').value, 
+            sharesPerAccount: document.getElementById('sharesPerAccount').value,
+            buyPrice: document.getElementById('buyPrice').value, 
+            buybackPrice: document.getElementById('buybackPrice').value,
+            expiryMonth: document.getElementById('expiryMonth').value, 
+            lotSize: document.getElementById('lotSize').value,
+            numLots: document.getElementById('numLots').value, 
+            futurePrice: document.getElementById('futurePrice').value, 
+            expectedPostPrice: document.getElementById('expectedPostPrice').value
+        };
+
+        db.collection("analyses").doc(docId).set(payload)
+        .then(() => {
+            updateSyncUI('saved');
+        })
+        .catch((error) => {
+            console.error("Auto-save failed: ", error);
+            updateSyncUI('error');
+        });
+    }
+
+    // ==========================================
     // CALCULATOR CORE
     // ==========================================
     function formatCurrency(num, noSymbol = false) {
@@ -387,7 +465,8 @@
         const shares = parseFloat(document.getElementById('sharesPerAccount').value) || 0;
         const buyPrice = parseFloat(document.getElementById('buyPrice').value) || 0;
         const buybackPrice = parseFloat(document.getElementById('buybackPrice').value) || 0;
-        const lotSize = parseFloat(document.getElementById('lotSize').value) || 0;
+        const lotSizeInput = document.getElementById('lotSize').value;
+        const lotSize = parseFloat(lotSizeInput) || 375; 
         const numLots = parseFloat(document.getElementById('numLots').value) || 0;
         const futurePrice = parseFloat(document.getElementById('futurePrice').value) || 0;
         const postPrice = parseFloat(document.getElementById('expectedPostPrice').value) || 0;
@@ -416,6 +495,8 @@
 
         calculateScenarios(totalShares, buyPrice, buybackPrice, futureShares, futurePrice, postPrice);
         generateMatrix(totalShares, buyPrice, buybackPrice, futureShares, futurePrice);
+
+        triggerAutoSave();
     }
 
     function calculateScenarios(totalShares, buyPrice, buybackPrice, futureShares, futurePrice, postPrice) {
@@ -531,14 +612,16 @@
 
         db.collection("analyses").doc(docId).set(payload)
         .then(() => {
-            btn.innerText = "Analysis Saved ✓";
+            btn.innerText = "Report Saved ✓";
             btn.style.background = "var(--profit-color)";
-            setTimeout(() => { btn.innerText = "Save Analysis to Cloud"; btn.style.background = "var(--primary)"; btn.disabled = false; }, 2000);
+            updateSyncUI('saved');
+            setTimeout(() => { btn.innerText = "Save Report"; btn.style.background = "var(--primary)"; btn.disabled = false; }, 2000);
         })
         .catch((error) => {
             console.error("Save failed: ", error);
             btn.innerText = "Save Failed!"; btn.style.background = "var(--loss-color)";
-            setTimeout(() => { btn.innerText = "Save Analysis to Cloud"; btn.style.background = "var(--primary)"; btn.disabled = false; }, 2000);
+            updateSyncUI('error');
+            setTimeout(() => { btn.innerText = "Save Report"; btn.style.background = "var(--primary)"; btn.disabled = false; }, 2000);
         });
     }
 
@@ -549,7 +632,7 @@
         db.collection("analyses").orderBy("timestamp", "desc").get()
         .then((querySnapshot) => {
             listDiv.innerHTML = '';
-            if (querySnapshot.empty) { listDiv.innerHTML = '<p>No saved analyses found.</p>'; return; }
+            if (querySnapshot.empty) { listDiv.innerHTML = '<p>No saved reports found.</p>'; return; }
 
             querySnapshot.forEach((doc) => {
                 const item = doc.data(); const docId = doc.id; 
@@ -597,7 +680,7 @@
         document.getElementById('buyPrice').value = item.buyPrice || '';
         document.getElementById('buybackPrice').value = item.buybackPrice || '';
         if(item.expiryMonth) document.getElementById('expiryMonth').value = item.expiryMonth;
-        document.getElementById('lotSize').value = item.lotSize || 1;
+        document.getElementById('lotSize').value = item.lotSize || ''; 
         document.getElementById('numLots').value = item.numLots || item.futureShares || '';
         document.getElementById('futurePrice').value = item.futurePrice || '';
         if(item.expectedPostPrice) {
@@ -606,6 +689,7 @@
         } else { document.getElementById('expectedPostPrice').value = ''; }
         
         closeSavedModal(); calculateAll();
+        document.getElementById('syncWrapper').style.display = 'none'; // Hide indicator on fresh load
     }
 
     // ==========================================
