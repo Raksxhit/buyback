@@ -190,7 +190,7 @@
                 <div class="card" style="margin-bottom: 0;">
                     
                     <div class="scrip-input-container">
-                        <input type="text" id="scripName" placeholder="Enter Scrip Name (e.g. TCS)" oninput="triggerAutoSave()">
+                        <input type="text" id="scripName" placeholder="Enter Scrip Name" oninput="triggerAutoSave()">
                         <div id="saveStatus" class="save-status">
                             <div class="status-dot" id="saveDot"></div>
                             <span id="saveText">Cloud Synced</span>
@@ -201,29 +201,29 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                         <div class="input-group">
                             <label>Accounts</label>
-                            <div class="input-control"><input type="number" id="numAccounts" value="8" oninput="updateTotalShares()"></div>
+                            <div class="input-control"><input type="number" id="numAccounts" placeholder="0" oninput="updateTotalShares()"></div>
                         </div>
                         <div class="input-group">
                             <label>Shares / Acct</label>
-                            <div class="input-control"><input type="number" id="sharesPerAccount" value="18" oninput="updateTotalShares()"></div>
+                            <div class="input-control"><input type="number" id="sharesPerAccount" placeholder="0" oninput="updateTotalShares()"></div>
                         </div>
                     </div>
 
                     <div class="input-group">
                         <label>Total Cash Shares Bought</label>
                         <div class="input-control">
-                            <input type="number" id="totalShares" value="144" readonly>
+                            <input type="number" id="totalShares" placeholder="0" readonly>
                         </div>
                     </div>
                     
                     <div class="input-group">
                         <label>Avg Cash Buy Price (₹)</label>
-                        <div class="input-control"><input type="number" id="buyPrice" value="9955" oninput="calculateAll()"></div>
+                        <div class="input-control"><input type="number" id="buyPrice" placeholder="0" oninput="calculateAll()"></div>
                     </div>
                     
                     <div class="input-group">
                         <label>Buyback Offer Price (₹)</label>
-                        <div class="input-control"><input type="number" id="buybackPrice" value="12000" oninput="calculateAll()"></div>
+                        <div class="input-control"><input type="number" id="buybackPrice" placeholder="0" oninput="calculateAll()"></div>
                     </div>
 
                     <div class="section-header">Hedge Positions</div>
@@ -240,7 +240,7 @@
                                     <option value="May">May</option>
                                     <option value="June">June</option>
                                     <option value="July">July</option>
-                                    <option value="August" selected>August</option>
+                                    <option value="August">August</option>
                                     <option value="September">September</option>
                                     <option value="October">October</option>
                                     <option value="November">November</option>
@@ -250,25 +250,23 @@
                         </div>
                         <div class="input-group">
                             <label>Short Quantity</label>
-                            <div class="input-control"><input type="number" id="futureShares" value="75" oninput="calculateAll()"></div>
+                            <div class="input-control"><input type="number" id="futureShares" placeholder="0" oninput="calculateAll()"></div>
                         </div>
                     </div>
 
                     <div class="input-group">
                         <label>Future Short Avg Price (₹)</label>
-                        <div class="input-control"><input type="number" id="futurePrice" value="9850" oninput="calculateAll()"></div>
+                        <div class="input-control"><input type="number" id="futurePrice" placeholder="0" oninput="calculateAll()"></div>
                     </div>
 
                     <div class="section-header">Analysis Control</div>
                     <div class="input-group">
                         <label>Expected Post-Buyback Price</label>
                         <div class="input-control">
-                            <input type="number" id="expectedPostPrice" value="9850" oninput="syncSlider(this.value)">
+                            <input type="number" id="expectedPostPrice" placeholder="0" oninput="syncSlider(this.value)">
                         </div>
                         <div class="slider-container">
-                            <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">₹5k</span>
-                            <input type="range" id="priceSlider" min="5000" max="15000" step="10" value="9850" oninput="syncInput(this.value)">
-                            <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">₹15k</span>
+                            <input type="range" id="priceSlider" min="0" max="25000" step="10" oninput="syncInput(this.value)">
                         </div>
                     </div>
 
@@ -397,16 +395,17 @@
         document.getElementById('scripName').value = '';
         document.getElementById('saveStatus').classList.remove('visible');
         
-        // Reset to default values
-        document.getElementById('numAccounts').value = '8';
-        document.getElementById('sharesPerAccount').value = '18';
-        document.getElementById('buyPrice').value = '9955';
-        document.getElementById('buybackPrice').value = '12000';
-        document.getElementById('futureShares').value = '75';
-        document.getElementById('futurePrice').value = '9850';
-        document.getElementById('expectedPostPrice').value = '9850';
-        document.getElementById('priceSlider').value = '9850';
-        document.getElementById('expiryMonth').value = 'August';
+        // Reset to completely blank states
+        document.getElementById('numAccounts').value = '';
+        document.getElementById('sharesPerAccount').value = '';
+        document.getElementById('totalShares').value = '';
+        document.getElementById('buyPrice').value = '';
+        document.getElementById('buybackPrice').value = '';
+        document.getElementById('futureShares').value = '';
+        document.getElementById('futurePrice').value = '';
+        document.getElementById('expectedPostPrice').value = '';
+        document.getElementById('priceSlider').value = 0;
+        document.getElementById('expiryMonth').selectedIndex = 0;
         
         updateTotalShares();
         switchTab('analyzer', true); // Force switch to analyzer and update home button visibility
@@ -428,7 +427,9 @@
     function updateTotalShares() {
         const accounts = parseFloat(document.getElementById('numAccounts').value) || 0;
         const shares = parseFloat(document.getElementById('sharesPerAccount').value) || 0;
-        document.getElementById('totalShares').value = accounts * shares;
+        
+        // Only set the total if there is actually data, otherwise leave blank
+        document.getElementById('totalShares').value = (accounts > 0 && shares > 0) ? (accounts * shares) : '';
         calculateAll();
     }
 
@@ -633,11 +634,11 @@
                                 </div>
                             </div>
                             <div class="saved-grid-details">
-                                <div><strong>Accts:</strong> ${item.numAccounts} × ${item.sharesPerAccount}</div>
-                                <div><strong>Cash Avg:</strong> ₹${item.buyPrice}</div>
-                                <div><strong>Buyback:</strong> ₹${item.buybackPrice}</div>
-                                <div><strong>Fut Qty:</strong> ${item.futureShares} (${item.expiryMonth || 'N/A'})</div>
-                                <div><strong>Fut Avg:</strong> ₹${item.futurePrice}</div>
+                                <div><strong>Accts:</strong> ${item.numAccounts || 0} × ${item.sharesPerAccount || 0}</div>
+                                <div><strong>Cash Avg:</strong> ₹${item.buyPrice || 0}</div>
+                                <div><strong>Buyback:</strong> ₹${item.buybackPrice || 0}</div>
+                                <div><strong>Fut Qty:</strong> ${item.futureShares || 0} (${item.expiryMonth || 'N/A'})</div>
+                                <div><strong>Fut Avg:</strong> ₹${item.futurePrice || 0}</div>
                             </div>
                         </div>
                     </div>
@@ -659,15 +660,23 @@
     }
 
     function loadScrip(item) {
-        document.getElementById('scripName').value = item.name;
-        document.getElementById('numAccounts').value = item.numAccounts;
-        document.getElementById('sharesPerAccount').value = item.sharesPerAccount;
-        document.getElementById('totalShares').value = item.totalShares;
-        document.getElementById('buyPrice').value = item.buyPrice;
-        document.getElementById('buybackPrice').value = item.buybackPrice;
+        document.getElementById('scripName').value = item.name || '';
+        document.getElementById('numAccounts').value = item.numAccounts || '';
+        document.getElementById('sharesPerAccount').value = item.sharesPerAccount || '';
+        document.getElementById('totalShares').value = item.totalShares || '';
+        document.getElementById('buyPrice').value = item.buyPrice || '';
+        document.getElementById('buybackPrice').value = item.buybackPrice || '';
         if(item.expiryMonth) document.getElementById('expiryMonth').value = item.expiryMonth;
-        document.getElementById('futureShares').value = item.futureShares;
-        document.getElementById('futurePrice').value = item.futurePrice;
+        document.getElementById('futureShares').value = item.futureShares || '';
+        document.getElementById('futurePrice').value = item.futurePrice || '';
+        
+        // Setup slider sync to prevent visual bug
+        if(item.expectedPostPrice) {
+            document.getElementById('expectedPostPrice').value = item.expectedPostPrice;
+            document.getElementById('priceSlider').value = item.expectedPostPrice;
+        } else {
+            document.getElementById('expectedPostPrice').value = '';
+        }
         
         // Show status as synced immediately
         const saveStatus = document.getElementById('saveStatus');
@@ -695,7 +704,7 @@
             
             const opt = {
                 margin:       [0.4, 0.4, 0.4, 0.4],
-                filename:     `${item.name}_Spread_Analysis.pdf`,
+                filename:     `${item.name || 'Blank'}_Spread_Analysis.pdf`,
                 image:        { type: 'jpeg', quality: 1 },
                 html2canvas:  { scale: 2, useCORS: true, windowWidth: 1300 }, // Forces canvas to look at the 1300px locked element
                 jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' },
@@ -709,10 +718,30 @@
         }, 500); // 500ms is plenty of time for modern browsers to render the grid
     }
 
-    // Initial calculations on load
+    // ==========================================
+    // 6. INITIAL LOAD LOGIC
+    // ==========================================
     window.onload = () => { 
-        updateTotalShares(); 
-        updateHomeButtonVisibility();
+        
+        // Check if there is data in the cloud to load initially
+        db.collection("analyses").orderBy("timestamp", "desc").limit(1).get()
+        .then((querySnapshot) => {
+            if (!querySnapshot.empty) {
+                // Found recent data, load it silently
+                const latestDoc = querySnapshot.docs[0].data();
+                loadScrip(latestDoc);
+            } else {
+                // Database is empty, leave slate blank and update math
+                updateTotalShares();
+                updateHomeButtonVisibility();
+            }
+        }).catch((error) => {
+            console.error("Error fetching initial data: ", error);
+            // Fallback to blank slate on error
+            updateTotalShares(); 
+            updateHomeButtonVisibility();
+        });
+
     };
 </script>
 
