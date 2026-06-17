@@ -162,10 +162,50 @@
         .saved-grid-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 16px; font-size: 13px; color: var(--text-muted); background: #f8fafc; padding: 16px; border-radius: 12px; width: 100%; box-sizing: border-box;}
         .saved-grid-details strong { color: var(--text-main); }
 
-        /* PDF Export Utility */
+        /* =========================================
+           COMPACT PDF EXPORT STYLES (Fixes Cutoffs)
+           ========================================= */
         #pdfContent { background: var(--bg-color); padding: 10px; }
-        .pdf-export-active { width: 1300px !important; max-width: 1300px !important; padding: 30px !important; background: white !important; }
-        .pdf-export-active .dashboard-top { grid-template-columns: 380px 1fr !important; gap: 30px !important; }
+        .pdf-header { display: none; margin-bottom: 16px; border-bottom: 2px solid var(--primary); padding-bottom: 12px; }
+        
+        .pdf-export-active { 
+            width: 1150px !important; 
+            max-width: 1150px !important; 
+            background: white !important; 
+            padding: 0 !important;
+        }
+        
+        .pdf-export-active .pdf-header { display: flex; justify-content: space-between; align-items: flex-end; }
+        .pdf-export-active .pdf-header h1 { font-size: 26px; margin: 0; color: var(--primary); letter-spacing: -0.02em; }
+        .pdf-export-active .pdf-header .date { font-size: 14px; font-weight: 600; color: var(--text-muted); }
+
+        .pdf-export-active .dashboard-top { grid-template-columns: 360px 1fr !important; gap: 20px !important; margin-bottom: 0 !important; }
+        
+        /* Compact Inputs to fit Page 1 */
+        .pdf-export-active .card { padding: 16px !important; margin-bottom: 0 !important; border: 1px solid var(--border-color) !important; box-shadow: none !important;}
+        .pdf-export-active .top-bar { margin-bottom: 16px !important; }
+        .pdf-export-active .scrip-input-container input { padding: 12px !important; font-size: 18px !important; }
+        .pdf-export-active .summary-metric { padding: 8px 16px !important; min-width: 140px !important; }
+        
+        .pdf-export-active .section-header { margin: 12px 0 8px 0 !important; font-size: 11px !important; }
+        .pdf-export-active .sub-header-line { margin: 12px 0 8px 0 !important; font-size: 11px !important; }
+        .pdf-export-active .input-group { margin-bottom: 8px !important; }
+        .pdf-export-active .input-group label { margin-bottom: 4px !important; font-size: 11px !important; }
+        .pdf-export-active .input-control input, .pdf-export-active .input-control select { padding: 6px 10px !important; font-size: 12px !important; height: auto !important; }
+        .pdf-export-active .visual-bar-wrapper { margin-top: 12px !important; padding: 12px !important; }
+        .pdf-export-active .expected-price-box { margin-top: 16px !important; padding: 12px !important; }
+        
+        /* Compact Tables */
+        .pdf-export-active th, .pdf-export-active td { padding: 6px 8px !important; font-size: 11.5px !important; }
+        .pdf-export-active .table-wrapper { border-radius: 8px !important; overflow: visible !important; max-height: none !important; }
+        
+        /* Format Page 2 (Matrix) */
+        .pdf-export-active .matrix-card { margin-top: 24px !important; }
+        .pdf-export-active .matrix-card > div { overflow: visible !important; max-height: none !important;}
+        
+        /* Hide UI Controls in PDF */
+        .pdf-export-active .btn-save-primary,
+        .pdf-export-active .slider-container { display: none !important; }
     </style>
 </head>
 <body>
@@ -182,6 +222,11 @@
 
     <div id="pdfContent">
         
+        <div class="pdf-header">
+            <h1 id="pdfReportTitle">Buyback Spread Analysis</h1>
+            <div class="date" id="pdfReportDate"></div>
+        </div>
+
         <div class="top-bar">
             <div class="scrip-input-container">
                 <input type="text" id="scripName" placeholder="Enter Scrip Name">
@@ -441,7 +486,7 @@
         document.getElementById('futureShares').value = futureShares > 0 ? futureShares : '';
         
         // Update Visual Progress Bar
-        const fillWidth = Math.min(pctHedged, 100); // Cap green bar at 100% width
+        const fillWidth = Math.min(pctHedged, 100); 
         document.getElementById('hedgeFill').style.width = fillWidth + '%';
         document.getElementById('lblHedged').innerText = (totalShares > 0 ? pctHedged.toFixed(1) : 0) + '% Hedged';
         document.getElementById('lblOpen').innerText = (totalShares > 0 ? pctOpen.toFixed(1) : 0) + '% Open';
@@ -676,7 +721,7 @@
     }
 
     // ==========================================
-    // 6. ITEM SPECIFIC PDF EXPORT
+    // 6. FLAWLESS 2-PAGE PDF EXPORT
     // ==========================================
     function exportSpecificReport(item) {
         loadScrip(item);
@@ -685,20 +730,24 @@
             const element = document.getElementById('pdfContent');
             element.classList.add('pdf-export-active'); 
             
-            // html2pdf respects the class "html2pdf__page-break" inserted into the HTML structure
+            // Set dynamic header values
+            document.getElementById('pdfReportTitle').innerText = `${item.name || 'Spread'} Analysis Report`;
+            document.getElementById('pdfReportDate').innerText = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+            
             const opt = {
-                margin:       [0.4, 0.4, 0.4, 0.4],
+                margin:       [0.2, 0.2, 0.2, 0.2], // Reduced margins
                 filename:     `${item.name || 'Blank'}_Spread_Analysis.pdf`,
-                image:        { type: 'jpeg', quality: 1 },
-                html2canvas:  { scale: 2, useCORS: true, windowWidth: 1300 }, 
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true }, 
                 jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' },
-                pagebreak:    { mode: ['css', 'legacy'] }
+                // mode: 'css' forces html2pdf to respect the 'html2pdf__page-break' div 
+                pagebreak:    { mode: ['css'] } 
             };
 
             html2pdf().set(opt).from(element).save().then(() => {
                 element.classList.remove('pdf-export-active');
             });
-        }, 500); 
+        }, 800); // 800ms gives time for DOM to re-render sizes before snapshot
     }
 
     // ==========================================
