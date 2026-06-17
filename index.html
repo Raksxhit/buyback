@@ -8,273 +8,323 @@
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root {
-            --bg-color: #f3f4f6;
+            --bg-color: #f8fafc;
             --card-bg: #ffffff;
-            --primary: #111827;
+            --primary: #0f172a;
             --primary-light: #1e293b;
             --primary-lighter: #334155;
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
-            --text-main: #111827;
-            --text-muted: #6b7280;
-            --border-color: #e5e7eb;
-            --profit-color: #059669;
-            --loss-color: #dc2626;
-            --matrix-green: #b7d896;
-            --matrix-amber: #fcd07a;
-            --matrix-red: #f39c8e;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --profit-color: #10b981;
+            --loss-color: #ef4444;
+            --matrix-green: #a7f3d0;
+            --matrix-amber: #fde68a;
+            --matrix-red: #fecaca;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
 
-        body { font-family: 'Inter', system-ui, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 32px 24px; -webkit-font-smoothing: antialiased; }
-        .container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
-        header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
-        header h1 { margin: 0; color: var(--primary); font-size: 24px; font-weight: 700; letter-spacing: -0.025em; }
-        .dashboard-grid { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
+        body { font-family: 'Inter', system-ui, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 24px; -webkit-font-smoothing: antialiased; }
         
+        /* Fade In Animation */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+
+        .container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        header h1 { margin: 0; color: var(--primary); font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+        
+        .header-actions { display: flex; gap: 12px; align-items: center; }
+        .btn-icon { background: #f1f5f9; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--text-main); transition: all 0.2s; display: flex; align-items: center; gap: 6px; font-size: 14px;}
+        .btn-icon:hover { background: #e2e8f0; transform: translateY(-1px); }
+        .btn-export { background: var(--primary); color: white; }
+        .btn-export:hover { background: var(--primary-light); }
+
+        .dashboard-grid { display: grid; grid-template-columns: 340px 1fr; gap: 24px; align-items: start; }
         @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } }
 
-        .card { background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05); border: 1px solid var(--border-color); padding: 24px; margin-bottom: 24px;}
-        .card-header { margin-top: 0; font-size: 14px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+        .card { background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow-md); border: 1px solid rgba(226, 232, 240, 0.8); padding: 24px; margin-bottom: 24px; transition: box-shadow 0.3s ease; }
+        .card:hover { box-shadow: var(--shadow-lg); }
         
+        /* Sectioning UI */
+        .section-header { font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin: 24px 0 16px 0; display: flex; align-items: center; gap: 8px; }
+        .section-header::after { content: ""; flex-grow: 1; height: 1px; background: var(--border-color); }
+        .section-header:first-child { margin-top: 0; }
+
         .input-group { margin-bottom: 16px; }
-        .input-group label { display: flex; justify-content: space-between; font-weight: 500; margin-bottom: 8px; font-size: 14px; color: var(--text-main); }
+        .input-group label { display: flex; justify-content: space-between; font-weight: 500; margin-bottom: 8px; font-size: 13px; color: var(--text-main); }
         .input-control { position: relative; }
-        .input-control input[type="number"], .input-control input[type="text"], .input-control select { width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; font-family: inherit; transition: all 0.2s ease; color: var(--text-main); background-color: #f9fafb; }
-        .input-control input:focus, .input-control select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); background-color: #ffffff; }
-        .input-control input:read-only { background-color: #e5e7eb; color: var(--text-muted); cursor: not-allowed; }
+        .input-control input[type="number"], .input-control input[type="text"], .input-control select { width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 14px; font-family: inherit; transition: all 0.2s ease; color: var(--text-main); background-color: #f8fafc; }
+        .input-control input:focus, .input-control select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); background-color: #ffffff; }
+        .input-control input:read-only { background-color: #f1f5f9; color: var(--text-muted); cursor: not-allowed; border-color: transparent; font-weight: 500;}
 
         .slider-container { margin-top: 12px; display: flex; align-items: center; gap: 12px; }
-        input[type="range"] { -webkit-appearance: none; width: 100%; height: 6px; background: #e5e7eb; border-radius: 4px; outline: none; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3); transition: transform 0.1s; }
+        input[type="range"] { -webkit-appearance: none; width: 100%; height: 6px; background: #e2e8f0; border-radius: 4px; outline: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid #fff; box-shadow: var(--shadow-sm); transition: transform 0.1s; }
         input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
 
-        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color); }
-        .summary-metric { background-color: #f0fdf4; padding: 16px; border-radius: 8px; border: 1px solid #bbf7d0; }
+        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color); }
+        .summary-metric { background-color: #f0fdf4; padding: 16px; border-radius: 12px; border: 1px solid #bbf7d0; display: flex; flex-direction: column; justify-content: center;}
         .summary-metric.alt { background-color: #eff6ff; border: 1px solid #bfdbfe; }
-        .metric-label { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
-        .metric-value { font-size: 20px; font-weight: 700; color: var(--text-main); }
+        .metric-label { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 6px; }
+        .metric-value { font-size: 22px; font-weight: 700; color: var(--text-main); }
 
-        .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border-color); background: #fff; max-height: 500px; }
+        /* Scrip Header Input */
+        .scrip-input-container { position: relative; margin-bottom: 24px; }
+        .scrip-input-container input { font-size: 20px; font-weight: 700; padding: 16px; border-radius: 12px; background: #f8fafc; border: 2px solid transparent; width: 100%; box-sizing: border-box; transition: all 0.2s;}
+        .scrip-input-container input:focus { border-color: var(--accent); background: white; outline: none; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+        .scrip-input-container input::placeholder { color: #94a3b8; font-weight: 500; }
+        
+        .save-status { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 12px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 6px; opacity: 0; transition: opacity 0.3s;}
+        .save-status.visible { opacity: 1; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--profit-color); }
+        .status-dot.saving { background: var(--accent); animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(0.95); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.5; } }
+
+        /* Tables */
+        .table-wrapper { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-color); background: #fff; }
         table { width: 100%; border-collapse: collapse; text-align: right; font-size: 13px; }
-        #scenarioTable thead { background-color: var(--primary-light); color: #ffffff; position: sticky; top: 0; z-index: 10; }
-        #scenarioTable th { padding: 14px 16px; white-space: nowrap; font-weight: 600; border: 1px solid rgba(255, 255, 255, 0.1); vertical-align: middle; }
+        th { padding: 14px 16px; white-space: nowrap; font-weight: 600; vertical-align: middle; }
+        thead th { position: sticky; top: 0; z-index: 10; color: white; border-right: 1px solid rgba(255,255,255,0.1); }
+        thead th:last-child { border-right: none; }
         #scenarioTable th.section-header-hedge { background-color: var(--primary-light); text-align: center; }
         #scenarioTable th.section-header-no-hedge { background-color: var(--primary-lighter); text-align: center; }
-        #scenarioTable thead tr:nth-child(2) th:nth-child(1), #scenarioTable thead tr:nth-child(2) th:nth-child(2), #scenarioTable thead tr:nth-child(2) th:nth-child(3) { background-color: var(--primary-light); }
-        #scenarioTable thead tr:nth-child(2) th:nth-child(4), #scenarioTable thead tr:nth-child(2) th:nth-child(5), #scenarioTable thead tr:nth-child(2) th:nth-child(6) { background-color: var(--primary-lighter); }
-        #scenarioTable tbody tr { border-bottom: 1px solid var(--border-color); transition: background-color 0.15s ease; }
-        #scenarioTable tbody tr:hover { background-color: #f8fafc; }
-        #scenarioTable td { padding: 12px 16px; white-space: nowrap; }
+        #scenarioTable thead tr:nth-child(2) th { background-color: var(--primary-light); }
+        #scenarioTable thead tr:nth-child(2) th:nth-child(n+4) { background-color: var(--primary-lighter); }
+        
+        tbody tr { border-bottom: 1px solid var(--border-color); transition: background-color 0.15s ease; }
+        tbody tr:hover { background-color: #f8fafc; }
+        td { padding: 12px 16px; white-space: nowrap; }
 
         .text-center { text-align: center !important; }
-        .profit { color: var(--profit-color); font-weight: 500; }
-        .loss { color: var(--loss-color); font-weight: 500; }
-        .pct-badge { font-size: 11px; margin-left: 4px; opacity: 0.8; font-weight: 600; }
+        .profit { color: var(--profit-color); font-weight: 600; }
+        .loss { color: var(--loss-color); font-weight: 600; }
+        .pct-badge { font-size: 11px; margin-left: 6px; padding: 2px 6px; border-radius: 12px; background: #f1f5f9; color: var(--text-muted); font-weight: 600; }
 
-        .matrix-section { margin-top: 12px; }
+        /* Matrix */
         .matrix-table { width: 100%; border-collapse: separate; border-spacing: 4px; background: transparent; border: none; }
-        .matrix-table th, .matrix-table td { padding: 14px 10px; text-align: center; border: none; font-size: 13px; border-radius: 6px; }
-        .matrix-table th { background-color: var(--primary-light); color: #ffffff; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.1); line-height: 1.4; }
-        .matrix-table td:first-child { font-weight: 600; background-color: #f1f5f9; color: #1e293b; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .matrix-cell { transition: transform 0.1s, filter 0.2s; cursor: crosshair; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .matrix-cell:hover { filter: brightness(0.95); transform: scale(1.02); z-index: 10; }
-        .matrix-green { background-color: var(--matrix-green); color: #0f172a; }
-        .matrix-amber { background-color: var(--matrix-amber); color: #0f172a; }
-        .matrix-red { background-color: var(--matrix-red); color: #0f172a; }
+        .matrix-table th, .matrix-table td { padding: 14px 10px; text-align: center; border: none; font-size: 13px; border-radius: 8px; }
+        .matrix-table th { background-color: var(--primary-light); color: #ffffff; font-weight: 600; line-height: 1.4; }
+        .matrix-table td:first-child { font-weight: 600; background-color: #f1f5f9; color: #1e293b; }
+        .matrix-cell { transition: transform 0.15s, filter 0.2s; font-weight: 600; }
+        .matrix-cell:hover { filter: brightness(0.95); transform: scale(1.03); z-index: 10; box-shadow: var(--shadow-md); cursor: pointer;}
+        .matrix-green { background-color: var(--matrix-green); color: #065f46; }
+        .matrix-amber { background-color: var(--matrix-amber); color: #92400e; }
+        .matrix-red { background-color: var(--matrix-red); color: #991b1b; }
 
-        .matrix-legend { display: flex; gap: 16px; margin-top: 20px; font-size: 12px; align-items: center; color: var(--text-muted); padding-top: 16px; border-top: 1px solid var(--border-color); }
-        .legend-item { display: flex; align-items: center; gap: 6px; }
-        .legend-color { width: 40px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #1f2937; font-weight: 500; }
+        .matrix-legend { display: flex; gap: 20px; margin-top: 20px; font-size: 12px; align-items: center; color: var(--text-muted); padding-top: 20px; border-top: 1px solid var(--border-color); }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-weight: 500;}
+        .legend-color { width: 32px; height: 16px; border-radius: 4px; }
 
-        /* Tabs and Saving Styles */
-        .tabs { display: flex; gap: 12px; }
-        .tab-btn { padding: 10px 20px; border: none; background: #e5e7eb; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
-        .tab-btn:hover { background: #d1d5db; }
-        .tab-btn.active { background: var(--accent); color: white; }
+        /* Tabs */
+        .tabs { display: flex; background: #f1f5f9; padding: 4px; border-radius: 10px; }
+        .tab-btn { padding: 8px 24px; border: none; background: transparent; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--text-muted); transition: all 0.2s; font-size: 14px;}
+        .tab-btn:hover { color: var(--primary); }
+        .tab-btn.active { background: white; color: var(--primary); box-shadow: var(--shadow-sm); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        .scrip-header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); display: flex; gap: 12px; }
-        .scrip-header input { flex-grow: 1; font-size: 18px; font-weight: 600; color: var(--primary); }
-        
-        .save-bar { display: flex; gap: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color); align-items: center; justify-content: flex-end;}
-        .btn-save { background: var(--profit-color); color: white; border: none; padding: 10px 32px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 15px; transition: opacity 0.2s; }
-        .btn-save:hover { opacity: 0.9; }
-        
-        .saved-item { display: flex; justify-content: space-between; padding: 16px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px; background: white; align-items: center; transition: box-shadow 0.2s;}
-        .saved-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-color: #cbd5e1; }
-        .btn-load { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.2s;}
+        /* Saved List styling */
+        .saved-item { display: flex; justify-content: space-between; padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 16px; background: white; align-items: center; transition: all 0.2s;}
+        .saved-item:hover { box-shadow: var(--shadow-md); border-color: #cbd5e1; transform: translateY(-2px);}
+        .btn-load { background: var(--accent); color: white; border: none; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.2s;}
         .btn-load:hover { background: var(--accent-hover); }
-        .btn-delete { background: var(--loss-color); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 500; margin-left: 8px; transition: opacity 0.2s;}
-        .btn-delete:hover { opacity: 0.8; }
+        .btn-delete { background: white; color: var(--loss-color); border: 1px solid var(--loss-color); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-left: 8px; transition: all 0.2s;}
+        .btn-delete:hover { background: #fef2f2; }
+        .saved-grid-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 12px; font-size: 13px; color: var(--text-muted); background: #f8fafc; padding: 12px 16px; border-radius: 8px;}
+        .saved-grid-details strong { color: var(--text-main); }
         
-        .saved-grid-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 8px; font-size: 13px; color: #4b5563; background: #f8fafc; padding: 10px; border-radius: 6px;}
+        /* Utility */
+        #pdfContent { background: var(--bg-color); padding: 10px; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="container animate-fade-in">
     <header>
-        <h1>Spread Analyzer & Matrix</h1>
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('analyzer')">Analyzer</button>
-            <button class="tab-btn" onclick="switchTab('saved')">Saved Analyses</button>
+        <div class="header-left">
+            <h1>Spread Analyzer & Matrix</h1>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('analyzer')">Analyzer</button>
+                <button class="tab-btn" onclick="switchTab('saved')">Saved Analyses</button>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn-icon" onclick="resetHome()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                Home
+            </button>
+            <button class="btn-icon btn-export" onclick="exportPDF()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Export PDF
+            </button>
         </div>
     </header>
 
     <div id="analyzerTab" class="tab-content active">
-        <div class="dashboard-grid">
-            <div class="card">
-                <div class="scrip-header">
-                    <div class="input-control" style="flex-grow: 1;">
-                        <input type="text" id="scripName" placeholder="Enter Scrip Name (e.g., TCS Q2 Buyback)">
-                    </div>
-                </div>
-
-                <h2 class="card-header" style="margin-bottom: 16px;">Trade Parameters</h2>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <div class="input-group">
-                        <label>Accounts</label>
-                        <div class="input-control"><input type="number" id="numAccounts" value="8" oninput="updateTotalShares()"></div>
-                    </div>
-                    <div class="input-group">
-                        <label>Shares/Acct</label>
-                        <div class="input-control"><input type="number" id="sharesPerAccount" value="18" oninput="updateTotalShares()"></div>
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label>Total Cash Shares Bought</label>
-                    <div class="input-control">
-                        <input type="number" id="totalShares" value="144" readonly>
-                    </div>
-                </div>
-                
-                <div class="input-group">
-                    <label>Avg Cash Buy Price (₹)</label>
-                    <div class="input-control"><input type="number" id="buyPrice" value="9955" oninput="calculateAll()"></div>
-                </div>
-                
-                <div class="input-group">
-                    <label>Buyback Offer Price (₹)</label>
-                    <div class="input-control"><input type="number" id="buybackPrice" value="12000" oninput="calculateAll()"></div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <div class="input-group">
-                        <label>Future Expiry</label>
-                        <div class="input-control">
-                            <select id="expiryMonth">
-                                <option value="Jan">January</option>
-                                <option value="Feb">February</option>
-                                <option value="Mar">March</option>
-                                <option value="Apr">April</option>
-                                <option value="May">May</option>
-                                <option value="Jun">June</option>
-                                <option value="Jul">July</option>
-                                <option value="Aug">August</option>
-                                <option value="Sep">September</option>
-                                <option value="Oct">October</option>
-                                <option value="Nov">November</option>
-                                <option value="Dec">December</option>
-                            </select>
+        <div id="pdfContent">
+            
+            <div class="dashboard-grid">
+                <div class="card" style="margin-bottom: 0;">
+                    
+                    <div class="scrip-input-container">
+                        <input type="text" id="scripName" placeholder="Enter Scrip Name (e.g. TCS)" oninput="triggerAutoSave()">
+                        <div id="saveStatus" class="save-status">
+                            <div class="status-dot" id="saveDot"></div>
+                            <span id="saveText">Cloud Synced</span>
                         </div>
                     </div>
+
+                    <div class="section-header">Cash Positions</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="input-group">
+                            <label>Accounts</label>
+                            <div class="input-control"><input type="number" id="numAccounts" value="8" oninput="updateTotalShares()"></div>
+                        </div>
+                        <div class="input-group">
+                            <label>Shares / Acct</label>
+                            <div class="input-control"><input type="number" id="sharesPerAccount" value="18" oninput="updateTotalShares()"></div>
+                        </div>
+                    </div>
+
                     <div class="input-group">
-                        <label>Short Quantity</label>
-                        <div class="input-control"><input type="number" id="futureShares" value="75" oninput="calculateAll()"></div>
+                        <label>Total Cash Shares Bought</label>
+                        <div class="input-control">
+                            <input type="number" id="totalShares" value="144" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Avg Cash Buy Price (₹)</label>
+                        <div class="input-control"><input type="number" id="buyPrice" value="9955" oninput="calculateAll()"></div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Buyback Offer Price (₹)</label>
+                        <div class="input-control"><input type="number" id="buybackPrice" value="12000" oninput="calculateAll()"></div>
+                    </div>
+
+                    <div class="section-header">Hedge Positions</div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="input-group">
+                            <label>Future Expiry</label>
+                            <div class="input-control">
+                                <select id="expiryMonth" onchange="triggerAutoSave()">
+                                    <option value="January">January</option>
+                                    <option value="February">February</option>
+                                    <option value="March">March</option>
+                                    <option value="April">April</option>
+                                    <option value="May">May</option>
+                                    <option value="June">June</option>
+                                    <option value="July">July</option>
+                                    <option value="August" selected>August</option>
+                                    <option value="September">September</option>
+                                    <option value="October">October</option>
+                                    <option value="November">November</option>
+                                    <option value="December">December</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Short Quantity</label>
+                            <div class="input-control"><input type="number" id="futureShares" value="75" oninput="calculateAll()"></div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Future Short Avg Price (₹)</label>
+                        <div class="input-control"><input type="number" id="futurePrice" value="9850" oninput="calculateAll()"></div>
+                    </div>
+
+                    <div class="section-header">Analysis Control</div>
+                    <div class="input-group">
+                        <label>Expected Post-Buyback Price</label>
+                        <div class="input-control">
+                            <input type="number" id="expectedPostPrice" value="9850" oninput="syncSlider(this.value)">
+                        </div>
+                        <div class="slider-container">
+                            <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">₹5k</span>
+                            <input type="range" id="priceSlider" min="5000" max="15000" step="10" value="9850" oninput="syncInput(this.value)">
+                            <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">₹15k</span>
+                        </div>
+                    </div>
+
+                    <div class="summary-grid">
+                        <div class="summary-metric alt">
+                            <div class="metric-label">Hedge Spread</div>
+                            <div class="metric-value" id="hedgeSpread">₹0</div>
+                        </div>
+                        <div class="summary-metric">
+                            <div class="metric-label">Buyback Premium</div>
+                            <div class="metric-value" id="bbSpread">₹0</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="input-group">
-                    <label>Future Short Avg Price (₹)</label>
-                    <div class="input-control"><input type="number" id="futurePrice" value="9850" oninput="calculateAll()"></div>
-                </div>
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <div class="card" style="margin: 0; padding: 0; border: none; box-shadow: none; background: transparent;">
+                        <div class="table-wrapper box-shadow: var(--shadow-md);">
+                            <table id="scenarioTable">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2" class="text-center">AR %</th>
+                                        <th rowspan="2" class="text-center">Accepted</th>
+                                        <th rowspan="2" class="text-center">Unaccepted</th>
+                                        <th colspan="3" class="section-header-hedge">WITH HEDGE SCENARIO</th>
+                                        <th colspan="3" class="section-header-no-hedge">WITHOUT HEDGE SCENARIO</th>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-center">BB Profit</th>
+                                        <th class="text-center">Open P&L</th>
+                                        <th class="text-center">Net P&L</th>
+                                        <th class="text-center">BB Profit</th>
+                                        <th class="text-center">Open P&L</th>
+                                        <th class="text-center">Net P&L</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
 
-                <div class="input-group" style="margin-top: 24px;">
-                    <label>Expected Post-Buyback Price</label>
-                    <div class="input-control">
-                        <input type="number" id="expectedPostPrice" value="9850" oninput="syncSlider(this.value)">
+                    <div class="card" style="margin: 0;">
+                        <div class="section-header" style="margin-top: 0; font-size: 13px;">SCENARIO MATRIX — NET PROFIT (WITH HEDGE) (₹)</div>
+                        <div style="overflow-x: auto; padding-bottom: 8px;">
+                            <table class="matrix-table" id="matrixTable">
+                                <thead>
+                                    <tr id="matrixHeadRow"></tr>
+                                </thead>
+                                <tbody id="matrixBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="matrix-legend">
+                            <div class="legend-item"><div class="legend-color matrix-green"></div><span>Profit > ₹50k</span></div>
+                            <div class="legend-item"><div class="legend-color matrix-amber"></div><span>Profit ₹0 – ₹50k</span></div>
+                            <div class="legend-item"><div class="legend-color matrix-red"></div><span>Loss</span></div>
+                        </div>
                     </div>
-                    <div class="slider-container">
-                        <span style="font-size: 11px; color: var(--text-muted);">₹5k</span>
-                        <input type="range" id="priceSlider" min="5000" max="15000" step="10" value="9850" oninput="syncInput(this.value)">
-                        <span style="font-size: 11px; color: var(--text-muted);">₹15k</span>
-                    </div>
-                </div>
-
-                <div class="summary-grid">
-                    <div class="summary-metric alt">
-                        <div class="metric-label">Hedge Spread</div>
-                        <div class="metric-value" id="hedgeSpread">₹0</div>
-                    </div>
-                    <div class="summary-metric">
-                        <div class="metric-label">Buyback Premium</div>
-                        <div class="metric-value" id="bbSpread">₹0</div>
-                    </div>
-                </div>
-
-                <div class="save-bar">
-                    <button class="btn-save" id="saveBtn" onclick="saveToFirestore()">Save</button>
                 </div>
             </div>
+        </div> </div>
 
-            <div style="display: flex; flex-direction: column; gap: 24px;">
-                <div class="card" style="margin: 0;">
-                    <h2 class="card-header">Arbitrage Scenario Table (5% Step Analysis)</h2>
-                    <div class="table-wrapper">
-                        <table id="scenarioTable">
-                            <thead>
-                                <tr>
-                                    <th rowspan="2" class="text-center">AR %</th>
-                                    <th rowspan="2" class="text-center">Accepted</th>
-                                    <th rowspan="2" class="text-center">Unaccepted</th>
-                                    <th colspan="3" class="section-header-hedge">WITH HEDGE SCENARIO</th>
-                                    <th colspan="3" class="section-header-no-hedge">WITHOUT HEDGE SCENARIO</th>
-                                </tr>
-                                <tr>
-                                    <th class="text-center">BB Profit</th>
-                                    <th class="text-center">Open P&L</th>
-                                    <th class="text-center">Net P&L</th>
-                                    <th class="text-center">BB Profit</th>
-                                    <th class="text-center">Open P&L</th>
-                                    <th class="text-center">Net P&L</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="card matrix-section" style="margin: 0;">
-                    <h2 class="card-header">SCENARIO MATRIX — NET PROFIT (WITH HEDGE) (₹)</h2>
-                    <div style="overflow-x: auto; padding-bottom: 8px;">
-                        <table class="matrix-table" id="matrixTable">
-                            <thead>
-                                <tr id="matrixHeadRow"></tr>
-                            </thead>
-                            <tbody id="matrixBody"></tbody>
-                        </table>
-                    </div>
-                    <div class="matrix-legend">
-                        <div class="legend-item"><div class="legend-color matrix-green">Green</div><span>> ₹50k</span></div>
-                        <div class="legend-item"><div class="legend-color matrix-amber">Amber</div><span>₹0–50k</span></div>
-                        <div class="legend-item"><div class="legend-color matrix-red">Red</div><span>Loss</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="savedTab" class="tab-content">
+    <div id="savedTab" class="tab-content animate-fade-in">
         <div class="card">
-            <h2 class="card-header">Saved Scrip Reports</h2>
+            <h2 style="margin-top: 0; color: var(--primary); font-size: 20px;">Saved Cloud Reports</h2>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Click load to restore a session to the analyzer.</p>
             <div id="savedList">
-                <p style="color: var(--text-muted)">Loading saved analyses...</p>
+                <p style="color: var(--text-muted);">Loading from cloud...</p>
             </div>
         </div>
     </div>
@@ -282,7 +332,7 @@
 
 <script>
     // ==========================================
-    // 1. FIRESTORE CONFIGURATION
+    // 1. FIRESTORE CONFIGURATION (UNTOUCHED)
     // ==========================================
     const firebaseConfig = {
         apiKey: "AIzaSyBGBC8M4BLM_H05Swt_b3wmLxiWTO_1A0Q",
@@ -293,34 +343,60 @@
         appId: "1:499894716471:web:8c8c63eb27f315c40817b2"
     };
 
-    // Initialize Firebase and Firestore
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
     // ==========================================
-    // 2. UI & CALCULATOR LOGIC
+    // 2. NAVIGATION & PDF EXPORT
     // ==========================================
     function switchTab(tabName) {
         document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        
         document.getElementById(tabName + 'Tab').classList.add('active');
         event.currentTarget.classList.add('active');
-
-        if(tabName === 'saved') {
-            loadSavedAnalyses();
-        }
+        if(tabName === 'saved') loadSavedAnalyses();
     }
 
-    function updateTotalShares() {
-        const accounts = parseFloat(document.getElementById('numAccounts').value) || 0;
-        const shares = parseFloat(document.getElementById('sharesPerAccount').value) || 0;
-        document.getElementById('totalShares').value = accounts * shares;
-        calculateAll();
+    function resetHome() {
+        document.getElementById('scripName').value = '';
+        document.getElementById('saveStatus').classList.remove('visible');
+        
+        // Reset to default values
+        document.getElementById('numAccounts').value = '8';
+        document.getElementById('sharesPerAccount').value = '18';
+        document.getElementById('buyPrice').value = '9955';
+        document.getElementById('buybackPrice').value = '12000';
+        document.getElementById('futureShares').value = '75';
+        document.getElementById('futurePrice').value = '9850';
+        document.getElementById('expectedPostPrice').value = '9850';
+        document.getElementById('priceSlider').value = '9850';
+        document.getElementById('expiryMonth').value = 'August';
+        
+        updateTotalShares();
+        
+        // Ensure Analyzer tab is visible
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('analyzerTab').classList.add('active');
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
     }
 
+    function exportPDF() {
+        const element = document.getElementById('pdfContent');
+        const scripName = document.getElementById('scripName').value.trim() || 'Analysis';
+        const opt = {
+            margin:       0.3,
+            filename:     `${scripName}_Spread_Report.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+
+    // ==========================================
+    // 3. UI & CALCULATOR LOGIC
+    // ==========================================
     function formatCurrency(num, noSymbol = false) {
         if(num === 0) return noSymbol ? "0" : "₹0";
         const sign = num < 0 ? "-" : "";
@@ -331,7 +407,18 @@
     function syncSlider(val) { document.getElementById('priceSlider').value = val; calculateAll(); }
     function syncInput(val) { document.getElementById('expectedPostPrice').value = val; calculateAll(); }
 
-    function calculateAll() { calculateScenarios(); generateMatrix(); }
+    function updateTotalShares() {
+        const accounts = parseFloat(document.getElementById('numAccounts').value) || 0;
+        const shares = parseFloat(document.getElementById('sharesPerAccount').value) || 0;
+        document.getElementById('totalShares').value = accounts * shares;
+        calculateAll();
+    }
+
+    function calculateAll() { 
+        calculateScenarios(); 
+        generateMatrix(); 
+        triggerAutoSave(); // Triggers auto-save on any calculation update
+    }
 
     function calculateScenarios() {
         const totalShares = parseFloat(document.getElementById('totalShares').value) || 0;
@@ -370,15 +457,15 @@
 
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td class="text-center">${pct}%</td>
+                <td class="text-center" style="font-weight: 600;">${pct}%</td>
                 <td class="text-center">${sharesAccepted}</td>
                 <td class="text-center">${remainingShares}</td>
                 <td>${formatCurrency(buybackProfit)}</td>
                 <td class="${unacceptedHedgedPnL >= 0 ? 'profit' : 'loss'}">${formatCurrency(unacceptedHedgedPnL)}</td>
-                <td class="${netWithHedge >= 0 ? 'profit' : 'loss'}">${formatCurrency(netWithHedge)} <span class="pct-badge">(${netWithHedgePct >= 0 ? '+' : ''}${netWithHedgePct}%)</span></td>
+                <td class="${netWithHedge >= 0 ? 'profit' : 'loss'}">${formatCurrency(netWithHedge)} <span class="pct-badge">${netWithHedgePct >= 0 ? '+' : ''}${netWithHedgePct}%</span></td>
                 <td>${formatCurrency(buybackProfit)}</td>
                 <td class="${unacceptedUnhedgedPnL >= 0 ? 'profit' : 'loss'}">${formatCurrency(unacceptedUnhedgedPnL)}</td>
-                <td class="${netWithoutHedge >= 0 ? 'profit' : 'loss'}">${formatCurrency(netWithoutHedge)} <span class="pct-badge">(${netWithoutHedgePct >= 0 ? '+' : ''}${netWithoutHedgePct}%)</span></td>
+                <td class="${netWithoutHedge >= 0 ? 'profit' : 'loss'}">${formatCurrency(netWithoutHedge)} <span class="pct-badge">${netWithoutHedgePct >= 0 ? '+' : ''}${netWithoutHedgePct}%</span></td>
             `;
             tbody.appendChild(row);
         }
@@ -400,7 +487,7 @@
         const pctOffsets = [-15, -10, -5, 0, 5, 10, 15];
         pctOffsets.forEach(offset => {
             const calculatedPrice = Math.round(futurePrice * (1 + (offset / 100)));
-            matrixHead.innerHTML += `<th>₹${calculatedPrice.toLocaleString('en-IN')}<br><span style="font-size: 11px; font-weight: 400; opacity: 0.85;">(${offset > 0 ? '+' : ''}${offset}%)</span></th>`;
+            matrixHead.innerHTML += `<th>₹${calculatedPrice.toLocaleString('en-IN')}<br><span style="font-size: 11px; font-weight: 500; opacity: 0.85;">(${offset > 0 ? '+' : ''}${offset}%)</span></th>`;
         });
 
         for (let pct = 5; pct <= 100; pct += 5) {
@@ -430,24 +517,39 @@
     }
 
     // ==========================================
-    // 3. FIRESTORE DATABASE LOGIC
+    // 4. REAL-TIME AUTO-SAVE LOGIC
     // ==========================================
-    function saveToFirestore() {
+    let autoSaveTimeout = null;
+
+    function triggerAutoSave() {
         const scripNameInput = document.getElementById('scripName').value.trim();
-        if(!scripNameInput) {
-            alert("Please enter a Scrip Name before saving.");
-            return;
-        }
         
-        // Use uppercase to ensure consistency (e.g. "tcs" and "TCS" overwrite the same file)
+        // Only attempt to save if there is a scrip name
+        if (!scripNameInput) {
+            document.getElementById('saveStatus').classList.remove('visible');
+            return; 
+        }
+
+        // Show "saving" UI state
+        const saveStatus = document.getElementById('saveStatus');
+        const saveDot = document.getElementById('saveDot');
+        const saveText = document.getElementById('saveText');
+        
+        saveStatus.classList.add('visible');
+        saveDot.classList.add('saving');
+        saveText.innerText = "Auto-saving...";
+
+        // Debounce: Clear existing timer and start a new one (1.5 seconds)
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(() => {
+            performFirebaseSave(scripNameInput);
+        }, 1500);
+    }
+
+    function performFirebaseSave(scripNameInput) {
         const docId = scripNameInput.toUpperCase();
-
-        const btn = document.getElementById('saveBtn');
-        btn.innerText = "Saving...";
-        btn.disabled = true;
-
         const payload = {
-            name: scripNameInput, // Keep original casing for display
+            name: scripNameInput,
             timestamp: Date.now(), 
             numAccounts: document.getElementById('numAccounts').value,
             sharesPerAccount: document.getElementById('sharesPerAccount').value,
@@ -459,30 +561,21 @@
             futurePrice: document.getElementById('futurePrice').value
         };
 
-        // .set() overwrites the document with the exact docId (Scrip Name)
         db.collection("analyses").doc(docId).set(payload)
         .then(() => {
-            alert(`Analysis for ${scripNameInput} Saved Successfully!`);
-            btn.innerText = "Save";
-            btn.disabled = false;
+            // Update UI to success state
+            const saveDot = document.getElementById('saveDot');
+            const saveText = document.getElementById('saveText');
+            saveDot.classList.remove('saving');
+            saveText.innerText = "Cloud Synced";
         })
         .catch((error) => {
-            console.error("Error writing document: ", error);
-            alert("Error saving data. Check console.");
-            btn.innerText = "Save";
-            btn.disabled = false;
+            console.error("Auto-save failed: ", error);
+            const saveText = document.getElementById('saveText');
+            saveText.innerText = "Save Failed!";
+            saveText.style.color = "var(--loss-color)";
+            document.getElementById('saveDot').style.background = "var(--loss-color)";
         });
-    }
-
-    function deleteAnalysis(docId) {
-        if(confirm(`Are you sure you want to delete the saved report for ${docId}?`)) {
-            db.collection("analyses").doc(docId).delete().then(() => {
-                loadSavedAnalyses(); // Refresh the list
-            }).catch((error) => {
-                console.error("Error removing document: ", error);
-                alert("Error deleting report.");
-            });
-        }
     }
 
     function loadSavedAnalyses() {
@@ -500,24 +593,26 @@
 
             querySnapshot.forEach((doc) => {
                 const item = doc.data();
-                const docId = doc.id; // This is the uppercase Scrip Name
-                const dateStr = new Date(item.timestamp).toLocaleString('en-IN');
+                const docId = doc.id; 
+                const dateStr = new Date(item.timestamp).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short'});
                 
                 listDiv.innerHTML += `
                     <div class="saved-item">
                         <div style="flex-grow: 1;">
-                            <strong style="font-size: 16px; color: var(--primary);">${item.name}</strong> 
-                            <span style="color: #6b7280; font-size: 12px; margin-left: 8px;">(Last updated: ${dateStr})</span>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <strong style="font-size: 18px; color: var(--primary);">${item.name}</strong> 
+                                <span style="font-size: 12px; color: var(--text-muted); background: #f1f5f9; padding: 4px 8px; border-radius: 6px;">Updated: ${dateStr}</span>
+                            </div>
                             <div class="saved-grid-details">
                                 <div><strong>Accts:</strong> ${item.numAccounts} × ${item.sharesPerAccount}</div>
                                 <div><strong>Cash Avg:</strong> ₹${item.buyPrice}</div>
                                 <div><strong>Buyback:</strong> ₹${item.buybackPrice}</div>
-                                <div><strong>Fut Qty:</strong> ${item.futureShares} (${item.expiryMonth})</div>
+                                <div><strong>Fut Qty:</strong> ${item.futureShares} (${item.expiryMonth || 'N/A'})</div>
                                 <div><strong>Fut Avg:</strong> ₹${item.futurePrice}</div>
                             </div>
                         </div>
-                        <div>
-                            <button class="btn-load" onclick='loadScrip(${JSON.stringify(item)})'>Load</button>
+                        <div style="display: flex; align-items: center;">
+                            <button class="btn-load" onclick='loadScrip(${JSON.stringify(item)})'>Load Setup</button>
                             <button class="btn-delete" onclick="deleteAnalysis('${docId}')">Delete</button>
                         </div>
                     </div>
@@ -530,6 +625,14 @@
         });
     }
 
+    function deleteAnalysis(docId) {
+        if(confirm(`Are you sure you want to delete the saved report for ${docId}?`)) {
+            db.collection("analyses").doc(docId).delete().then(() => {
+                loadSavedAnalyses();
+            }).catch((error) => console.error("Error removing document: ", error));
+        }
+    }
+
     function loadScrip(item) {
         document.getElementById('scripName').value = item.name;
         document.getElementById('numAccounts').value = item.numAccounts;
@@ -537,15 +640,17 @@
         document.getElementById('totalShares').value = item.totalShares;
         document.getElementById('buyPrice').value = item.buyPrice;
         document.getElementById('buybackPrice').value = item.buybackPrice;
-        
-        // Handle legacy saved files that might not have an expiry month
-        if(item.expiryMonth) {
-            document.getElementById('expiryMonth').value = item.expiryMonth;
-        }
-        
+        if(item.expiryMonth) document.getElementById('expiryMonth').value = item.expiryMonth;
         document.getElementById('futureShares').value = item.futureShares;
         document.getElementById('futurePrice').value = item.futurePrice;
         
+        // Show status as synced immediately
+        const saveStatus = document.getElementById('saveStatus');
+        saveStatus.classList.add('visible');
+        document.getElementById('saveDot').classList.remove('saving');
+        document.getElementById('saveText').innerText = "Cloud Synced";
+        
+        // Switch view back to analyzer
         switchTab('analyzer');
         document.querySelectorAll('.tab-btn')[0].classList.add('active');
         document.querySelectorAll('.tab-btn')[1].classList.remove('active');
@@ -553,6 +658,7 @@
         calculateAll();
     }
 
+    // Initial calculations on load
     window.onload = () => { updateTotalShares(); };
 </script>
 
