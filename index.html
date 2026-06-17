@@ -42,8 +42,8 @@
         .input-group { margin-bottom: 16px; }
         .input-group label { display: flex; justify-content: space-between; font-weight: 500; margin-bottom: 8px; font-size: 14px; color: var(--text-main); }
         .input-control { position: relative; }
-        .input-control input[type="number"], .input-control input[type="text"] { width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; font-family: inherit; transition: all 0.2s ease; color: var(--text-main); background-color: #f9fafb; }
-        .input-control input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); background-color: #ffffff; }
+        .input-control input[type="number"], .input-control input[type="text"], .input-control select { width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; font-family: inherit; transition: all 0.2s ease; color: var(--text-main); background-color: #f9fafb; }
+        .input-control input:focus, .input-control select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); background-color: #ffffff; }
         .input-control input:read-only { background-color: #e5e7eb; color: var(--text-muted); cursor: not-allowed; }
 
         .slider-container { margin-top: 12px; display: flex; align-items: center; gap: 12px; }
@@ -97,14 +97,20 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        .save-bar { display: flex; gap: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color); align-items: center;}
-        .btn-save { background: var(--profit-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: opacity 0.2s; }
+        .scrip-header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); display: flex; gap: 12px; }
+        .scrip-header input { flex-grow: 1; font-size: 18px; font-weight: 600; color: var(--primary); }
+        
+        .save-bar { display: flex; gap: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color); align-items: center; justify-content: flex-end;}
+        .btn-save { background: var(--profit-color); color: white; border: none; padding: 10px 32px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 15px; transition: opacity 0.2s; }
         .btn-save:hover { opacity: 0.9; }
         
         .saved-item { display: flex; justify-content: space-between; padding: 16px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px; background: white; align-items: center; transition: box-shadow 0.2s;}
         .saved-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-color: #cbd5e1; }
         .btn-load { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.2s;}
         .btn-load:hover { background: var(--accent-hover); }
+        .btn-delete { background: var(--loss-color); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 500; margin-left: 8px; transition: opacity 0.2s;}
+        .btn-delete:hover { opacity: 0.8; }
+        
         .saved-grid-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 8px; font-size: 13px; color: #4b5563; background: #f8fafc; padding: 10px; border-radius: 6px;}
     </style>
 </head>
@@ -122,7 +128,13 @@
     <div id="analyzerTab" class="tab-content active">
         <div class="dashboard-grid">
             <div class="card">
-                <h2 class="card-header">Trade Parameters</h2>
+                <div class="scrip-header">
+                    <div class="input-control" style="flex-grow: 1;">
+                        <input type="text" id="scripName" placeholder="Enter Scrip Name (e.g., TCS Q2 Buyback)">
+                    </div>
+                </div>
+
+                <h2 class="card-header" style="margin-bottom: 16px;">Trade Parameters</h2>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <div class="input-group">
@@ -146,20 +158,44 @@
                     <label>Avg Cash Buy Price (₹)</label>
                     <div class="input-control"><input type="number" id="buyPrice" value="9955" oninput="calculateAll()"></div>
                 </div>
+                
                 <div class="input-group">
                     <label>Buyback Offer Price (₹)</label>
                     <div class="input-control"><input type="number" id="buybackPrice" value="12000" oninput="calculateAll()"></div>
                 </div>
-                <div class="input-group">
-                    <label>Future Short Quantity</label>
-                    <div class="input-control"><input type="number" id="futureShares" value="75" oninput="calculateAll()"></div>
-                </div>
-                <div class="input-group">
-                    <label>Future Short Price (₹)</label>
-                    <div class="input-control"><input type="number" id="futurePrice" value="9850" oninput="calculateAll()"></div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="input-group">
+                        <label>Future Expiry</label>
+                        <div class="input-control">
+                            <select id="expiryMonth">
+                                <option value="Jan">January</option>
+                                <option value="Feb">February</option>
+                                <option value="Mar">March</option>
+                                <option value="Apr">April</option>
+                                <option value="May">May</option>
+                                <option value="Jun">June</option>
+                                <option value="Jul">July</option>
+                                <option value="Aug">August</option>
+                                <option value="Sep">September</option>
+                                <option value="Oct">October</option>
+                                <option value="Nov">November</option>
+                                <option value="Dec">December</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Short Quantity</label>
+                        <div class="input-control"><input type="number" id="futureShares" value="75" oninput="calculateAll()"></div>
+                    </div>
                 </div>
 
                 <div class="input-group">
+                    <label>Future Short Avg Price (₹)</label>
+                    <div class="input-control"><input type="number" id="futurePrice" value="9850" oninput="calculateAll()"></div>
+                </div>
+
+                <div class="input-group" style="margin-top: 24px;">
                     <label>Expected Post-Buyback Price</label>
                     <div class="input-control">
                         <input type="number" id="expectedPostPrice" value="9850" oninput="syncSlider(this.value)">
@@ -183,10 +219,7 @@
                 </div>
 
                 <div class="save-bar">
-                    <div class="input-control" style="flex-grow: 1;">
-                        <input type="text" id="scripName" placeholder="e.g. TCS Q2 Buyback">
-                    </div>
-                    <button class="btn-save" id="saveBtn" onclick="saveToFirestore()">Save Report</button>
+                    <button class="btn-save" id="saveBtn" onclick="saveToFirestore()">Save</button>
                 </div>
             </div>
 
@@ -400,49 +433,62 @@
     // 3. FIRESTORE DATABASE LOGIC
     // ==========================================
     function saveToFirestore() {
-        const scripName = document.getElementById('scripName').value.trim();
-        if(!scripName) {
+        const scripNameInput = document.getElementById('scripName').value.trim();
+        if(!scripNameInput) {
             alert("Please enter a Scrip Name before saving.");
             return;
         }
+        
+        // Use uppercase to ensure consistency (e.g. "tcs" and "TCS" overwrite the same file)
+        const docId = scripNameInput.toUpperCase();
 
         const btn = document.getElementById('saveBtn');
         btn.innerText = "Saving...";
         btn.disabled = true;
 
         const payload = {
-            name: scripName,
-            timestamp: Date.now(), // Easy for sorting
+            name: scripNameInput, // Keep original casing for display
+            timestamp: Date.now(), 
             numAccounts: document.getElementById('numAccounts').value,
             sharesPerAccount: document.getElementById('sharesPerAccount').value,
             totalShares: document.getElementById('totalShares').value,
             buyPrice: document.getElementById('buyPrice').value,
             buybackPrice: document.getElementById('buybackPrice').value,
+            expiryMonth: document.getElementById('expiryMonth').value,
             futureShares: document.getElementById('futureShares').value,
             futurePrice: document.getElementById('futurePrice').value
         };
 
-        // Add a new document with a generated id to the 'analyses' collection
-        db.collection("analyses").add(payload)
-        .then((docRef) => {
-            alert("Analysis Saved Successfully!");
-            document.getElementById('scripName').value = "";
-            btn.innerText = "Save Report";
+        // .set() overwrites the document with the exact docId (Scrip Name)
+        db.collection("analyses").doc(docId).set(payload)
+        .then(() => {
+            alert(`Analysis for ${scripNameInput} Saved Successfully!`);
+            btn.innerText = "Save";
             btn.disabled = false;
         })
         .catch((error) => {
-            console.error("Error adding document: ", error);
+            console.error("Error writing document: ", error);
             alert("Error saving data. Check console.");
-            btn.innerText = "Save Report";
+            btn.innerText = "Save";
             btn.disabled = false;
         });
+    }
+
+    function deleteAnalysis(docId) {
+        if(confirm(`Are you sure you want to delete the saved report for ${docId}?`)) {
+            db.collection("analyses").doc(docId).delete().then(() => {
+                loadSavedAnalyses(); // Refresh the list
+            }).catch((error) => {
+                console.error("Error removing document: ", error);
+                alert("Error deleting report.");
+            });
+        }
     }
 
     function loadSavedAnalyses() {
         const listDiv = document.getElementById('savedList');
         listDiv.innerHTML = '<p style="color: var(--text-muted)">Fetching from cloud...</p>';
 
-        // Get collection, order by newest first
         db.collection("analyses").orderBy("timestamp", "desc").get()
         .then((querySnapshot) => {
             listDiv.innerHTML = '';
@@ -454,22 +500,26 @@
 
             querySnapshot.forEach((doc) => {
                 const item = doc.data();
+                const docId = doc.id; // This is the uppercase Scrip Name
                 const dateStr = new Date(item.timestamp).toLocaleString('en-IN');
                 
                 listDiv.innerHTML += `
                     <div class="saved-item">
                         <div style="flex-grow: 1;">
                             <strong style="font-size: 16px; color: var(--primary);">${item.name}</strong> 
-                            <span style="color: #6b7280; font-size: 12px; margin-left: 8px;">${dateStr}</span>
+                            <span style="color: #6b7280; font-size: 12px; margin-left: 8px;">(Last updated: ${dateStr})</span>
                             <div class="saved-grid-details">
                                 <div><strong>Accts:</strong> ${item.numAccounts} × ${item.sharesPerAccount}</div>
                                 <div><strong>Cash Avg:</strong> ₹${item.buyPrice}</div>
                                 <div><strong>Buyback:</strong> ₹${item.buybackPrice}</div>
-                                <div><strong>Fut Qty:</strong> ${item.futureShares}</div>
+                                <div><strong>Fut Qty:</strong> ${item.futureShares} (${item.expiryMonth})</div>
                                 <div><strong>Fut Avg:</strong> ₹${item.futurePrice}</div>
                             </div>
                         </div>
-                        <button class="btn-load" style="margin-left: 20px;" onclick='loadScrip(${JSON.stringify(item)})'>Load</button>
+                        <div>
+                            <button class="btn-load" onclick='loadScrip(${JSON.stringify(item)})'>Load</button>
+                            <button class="btn-delete" onclick="deleteAnalysis('${docId}')">Delete</button>
+                        </div>
                     </div>
                 `;
             });
@@ -481,11 +531,18 @@
     }
 
     function loadScrip(item) {
+        document.getElementById('scripName').value = item.name;
         document.getElementById('numAccounts').value = item.numAccounts;
         document.getElementById('sharesPerAccount').value = item.sharesPerAccount;
         document.getElementById('totalShares').value = item.totalShares;
         document.getElementById('buyPrice').value = item.buyPrice;
         document.getElementById('buybackPrice').value = item.buybackPrice;
+        
+        // Handle legacy saved files that might not have an expiry month
+        if(item.expiryMonth) {
+            document.getElementById('expiryMonth').value = item.expiryMonth;
+        }
+        
         document.getElementById('futureShares').value = item.futureShares;
         document.getElementById('futurePrice').value = item.futurePrice;
         
