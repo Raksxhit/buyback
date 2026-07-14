@@ -118,6 +118,12 @@
         #scenarioTable tbody tr:last-child td { border-bottom: none; }
         #scenarioTable tbody tr:hover td { background-color: #f1f5f9; }
         #scenarioTable td.col-hedge { background-color: #f8fbff; } 
+
+        /* Manual "Actual Result" row highlighting */
+        #scenarioTable tbody tr.actual-row td { background-color: #fffbeb !important; border-top: 2px solid #f59e0b; border-bottom: 2px solid #f59e0b; font-weight: 700; }
+        #scenarioTable tbody tr.actual-row:hover td { background-color: #fef3c7 !important; }
+        #scenarioTable tbody tr.actual-row td.col-hedge { background-color: #fef7e6 !important; }
+        .actual-tag { font-size: 10px; background: #f59e0b; color: #fff; padding: 2px 6px; border-radius: 8px; margin-left: 6px; letter-spacing: 0.03em; vertical-align: middle; }
         
         .text-center { text-align: center !important; }
         .profit { color: var(--profit-color); font-weight: 600; }
@@ -234,6 +240,11 @@
             <div class="input-group" style="margin-top: 12px;">
                 <label>Buyback Offer Price (₹)</label>
                 <div class="input-control"><input type="number" id="buybackPrice" placeholder="0" oninput="calculateAll()"></div>
+            </div>
+
+            <div class="input-group" style="margin-top: 12px;">
+                <label>Actual Accepted Shares (Manual) <span style="font-weight:500; color: var(--text-muted); text-transform: none;">optional</span></label>
+                <div class="input-control"><input type="number" id="manualAccepted" placeholder="Enter actual shares accepted by company" oninput="calculateAll()"></div>
             </div>
 
             <div class="section-header" style="margin-top: 16px;">Hedge Positions</div>
@@ -428,7 +439,8 @@
             lotSize: document.getElementById('lotSize').value,
             numLots: document.getElementById('numLots').value, 
             futurePrice: document.getElementById('futurePrice').value, 
-            expectedPostPrice: document.getElementById('expectedPostPrice').value
+            expectedPostPrice: document.getElementById('expectedPostPrice').value,
+            manualAccepted: document.getElementById('manualAccepted').value
         };
 
         db.collection("analyses").doc(docId).set(payload)
@@ -470,6 +482,8 @@
         const numLots = parseFloat(document.getElementById('numLots').value) || 0;
         const futurePrice = parseFloat(document.getElementById('futurePrice').value) || 0;
         const postPrice = parseFloat(document.getElementById('expectedPostPrice').value) || 0;
+        const manualAcceptedInput = document.getElementById('manualAccepted').value;
+        const manualAccepted = parseFloat(manualAcceptedInput);
 
         const totalShares = accounts * shares;
         const totalValue = totalShares * buyPrice;
@@ -493,56 +507,70 @@
         document.getElementById('hedgeSpread').innerText = formatCurrency(futurePrice - buyPrice);
         document.getElementById('bbSpread').innerText = formatCurrency(buybackPrice - buyPrice);
 
-        calculateScenarios(totalShares, buyPrice, buybackPrice, futureShares, futurePrice, postPrice);
+        calculateScenarios(totalShares, buyPrice, buybackPrice, futureShares, futurePrice, postPrice, manualAccepted);
         generateMatrix(totalShares, buyPrice, buybackPrice, futureShares, futurePrice);
 
         triggerAutoSave();
     }
 
-    function calculateScenarios(totalShares, buyPrice, buybackPrice, futureShares, futurePrice, postPrice) {
+    function buildScenarioRow(pctLabel, sharesAccepted, totalShares, buyPrice, buybackPrice, futureShares, futurePrice, postPrice, totalInvestment, isActual) {
+        const remainingShares = totalShares - sharesAccepted;
+        const buybackProfit = sharesAccepted * (buybackPrice - buyPrice);
+
+        let unacceptedHedgedPnL = 0;
+        if (remainingShares >= futureShares) {
+            unacceptedHedgedPnL = (futureShares * (futurePrice - buyPrice)) + ((remainingShares - futureShares) * (postPrice - buyPrice));
+        } else {
+            unacceptedHedgedPnL = (remainingShares * (futurePrice - buyPrice)) + ((futureShares - remainingShares) * (futurePrice - postPrice));
+        }
+
+        const netWithHedge = buybackProfit + unacceptedHedgedPnL;
+        const netWithHedgePct = totalInvestment > 0 ? ((netWithHedge / totalInvestment) * 100).toFixed(2) : 0;
+
+        const unacceptedUnhedgedPnL = remainingShares * (postPrice - buyPrice);
+        const netWithoutHedge = buybackProfit + unacceptedUnhedgedPnL;
+        const netWithoutHedgePct = totalInvestment > 0 ? ((netWithoutHedge / totalInvestment) * 100).toFixed(2) : 0;
+
+        const row = document.createElement('tr');
+        if (isActual) row.className = 'actual-row';
+        row.innerHTML = `
+            <td class="text-center font-bold">${pctLabel}${isActual ? '<span class="actual-tag">ACTUAL</span>' : ''}</td>
+            <td class="text-center text-muted">${sharesAccepted}</td>
+            <td class="text-center text-muted">${remainingShares}</td>
+            
+            <td class="col-hedge">${formatCurrency(buybackProfit)}</td>
+            <td class="col-hedge ${unacceptedHedgedPnL >= 0 ? 'profit' : 'loss'}">${formatCurrency(unacceptedHedgedPnL)}</td>
+            <td class="col-hedge font-bold ${netWithHedge >= 0 ? 'profit' : 'loss'}">
+                ${formatCurrency(netWithHedge)} 
+                <span class="${getBadgeClass(netWithHedgePct)}">${netWithHedgePct > 0 ? '+' : ''}${netWithHedgePct}%</span>
+            </td>
+            
+            <td>${formatCurrency(buybackProfit)}</td>
+            <td class="${unacceptedUnhedgedPnL >= 0 ? 'profit' : 'loss'}">${formatCurrency(unacceptedUnhedgedPnL)}</td>
+            <td class="font-bold ${netWithoutHedge >= 0 ? 'profit' : 'loss'}">
+                ${formatCurrency(netWithoutHedge)} 
+                <span class="${getBadgeClass(netWithoutHedgePct)}">${netWithoutHedgePct > 0 ? '+' : ''}${netWithoutHedgePct}%</span>
+            </td>
+        `;
+        return row;
+    }
+
+    function calculateScenarios(totalShares, buyPrice, buybackPrice, futureShares, futurePrice, postPrice, manualAccepted) {
         const totalInvestment = (totalShares * buyPrice) + (futureShares * futurePrice * 0.25);
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
+        // Manual "Actual Accepted Shares" row - shown pinned at the top, highlighted
+        if (!isNaN(manualAccepted) && manualAccepted >= 0 && totalShares > 0) {
+            const sharesAccepted = Math.min(manualAccepted, totalShares);
+            const actualPct = ((sharesAccepted / totalShares) * 100).toFixed(2) + '%';
+            const actualRow = buildScenarioRow(actualPct, sharesAccepted, totalShares, buyPrice, buybackPrice, futureShares, futurePrice, postPrice, totalInvestment, true);
+            tbody.appendChild(actualRow);
+        }
+
         for (let pct = 0; pct <= 100; pct += 5) {
             const sharesAccepted = Math.round((pct / 100) * totalShares);
-            const remainingShares = totalShares - sharesAccepted;
-            const buybackProfit = sharesAccepted * (buybackPrice - buyPrice);
-
-            let unacceptedHedgedPnL = 0;
-            if (remainingShares >= futureShares) {
-                unacceptedHedgedPnL = (futureShares * (futurePrice - buyPrice)) + ((remainingShares - futureShares) * (postPrice - buyPrice));
-            } else {
-                unacceptedHedgedPnL = (remainingShares * (futurePrice - buyPrice)) + ((futureShares - remainingShares) * (futurePrice - postPrice));
-            }
-            
-            const netWithHedge = buybackProfit + unacceptedHedgedPnL;
-            const netWithHedgePct = totalInvestment > 0 ? ((netWithHedge / totalInvestment) * 100).toFixed(2) : 0;
-
-            const unacceptedUnhedgedPnL = remainingShares * (postPrice - buyPrice);
-            const netWithoutHedge = buybackProfit + unacceptedUnhedgedPnL;
-            const netWithoutHedgePct = totalInvestment > 0 ? ((netWithoutHedge / totalInvestment) * 100).toFixed(2) : 0;
-
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td class="text-center font-bold">${pct}%</td>
-                <td class="text-center text-muted">${sharesAccepted}</td>
-                <td class="text-center text-muted">${remainingShares}</td>
-                
-                <td class="col-hedge">${formatCurrency(buybackProfit)}</td>
-                <td class="col-hedge ${unacceptedHedgedPnL >= 0 ? 'profit' : 'loss'}">${formatCurrency(unacceptedHedgedPnL)}</td>
-                <td class="col-hedge font-bold ${netWithHedge >= 0 ? 'profit' : 'loss'}">
-                    ${formatCurrency(netWithHedge)} 
-                    <span class="${getBadgeClass(netWithHedgePct)}">${netWithHedgePct > 0 ? '+' : ''}${netWithHedgePct}%</span>
-                </td>
-                
-                <td>${formatCurrency(buybackProfit)}</td>
-                <td class="${unacceptedUnhedgedPnL >= 0 ? 'profit' : 'loss'}">${formatCurrency(unacceptedUnhedgedPnL)}</td>
-                <td class="font-bold ${netWithoutHedge >= 0 ? 'profit' : 'loss'}">
-                    ${formatCurrency(netWithoutHedge)} 
-                    <span class="${getBadgeClass(netWithoutHedgePct)}">${netWithoutHedgePct > 0 ? '+' : ''}${netWithoutHedgePct}%</span>
-                </td>
-            `;
+            const row = buildScenarioRow(pct + '%', sharesAccepted, totalShares, buyPrice, buybackPrice, futureShares, futurePrice, postPrice, totalInvestment, false);
             tbody.appendChild(row);
         }
     }
@@ -607,7 +635,8 @@
             numAccounts: document.getElementById('numAccounts').value, sharesPerAccount: document.getElementById('sharesPerAccount').value,
             buyPrice: document.getElementById('buyPrice').value, buybackPrice: document.getElementById('buybackPrice').value,
             expiryMonth: document.getElementById('expiryMonth').value, lotSize: document.getElementById('lotSize').value,
-            numLots: document.getElementById('numLots').value, futurePrice: document.getElementById('futurePrice').value, expectedPostPrice: document.getElementById('expectedPostPrice').value
+            numLots: document.getElementById('numLots').value, futurePrice: document.getElementById('futurePrice').value, expectedPostPrice: document.getElementById('expectedPostPrice').value,
+            manualAccepted: document.getElementById('manualAccepted').value
         };
 
         db.collection("analyses").doc(docId).set(payload)
@@ -658,6 +687,7 @@
                                 <div><strong>Buyback:</strong> ₹${item.buybackPrice || 0}</div>
                                 <div><strong>Fut Qty:</strong> ${futureQty} (${item.expiryMonth || 'N/A'})</div>
                                 <div><strong>Fut Avg:</strong> ₹${item.futurePrice || 0}</div>
+                                ${item.manualAccepted ? `<div><strong>Actual Accepted:</strong> ${item.manualAccepted}</div>` : ''}
                             </div>
                         </div>
                     </div>
@@ -683,6 +713,7 @@
         document.getElementById('lotSize').value = item.lotSize || ''; 
         document.getElementById('numLots').value = item.numLots || item.futureShares || '';
         document.getElementById('futurePrice').value = item.futurePrice || '';
+        document.getElementById('manualAccepted').value = item.manualAccepted || '';
         if(item.expectedPostPrice) {
             document.getElementById('expectedPostPrice').value = item.expectedPostPrice;
             document.getElementById('priceSlider').value = item.expectedPostPrice;
