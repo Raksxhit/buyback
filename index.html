@@ -943,8 +943,8 @@ function drawChart(V) {
     const mid = (yo + yh) / 2, dir = yo <= yh ? -1 : 1;
     yo = mid + dir * 5.5; yh = mid - dir * 5.5;
   }
-  lab(W - P.r + 7, yo + 3, 'no hedge', { 'text-anchor': 'start', 'font-family': 'Archivo, sans-serif', 'font-size': 9 });
-  lab(W - P.r + 7, yh + 3, 'hedged', { 'text-anchor': 'start', fill: C.brass, 'font-family': 'Archivo, sans-serif', 'font-size': 9, 'font-weight': 700 });
+  lab(W - P.r + 7, yo + 3, 'No hedge', { 'text-anchor': 'start', 'font-family': 'Archivo, sans-serif', 'font-size': 9 });
+  lab(W - P.r + 7, yh + 3, 'Hedged', { 'text-anchor': 'start', fill: C.brass, 'font-family': 'Archivo, sans-serif', 'font-size': 9, 'font-weight': 700 });
 
   /* what the hedge is worth, named on the band */
   const gap = V.futureShares * (V.futurePrice - V.futExit);
