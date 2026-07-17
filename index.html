@@ -345,7 +345,7 @@ tbody tr.actual.cursor td{box-shadow:inset 3px 0 0 var(--amber)}
       <span class="mark-dot"></span>
       <span class="mark-txt">
         <span class="mark-name">BUYBACK <span>ANALYSER</span></span>
-        <span class="mark-by">by Raksh</span>
+        <span class="mark-by">By Raksh</span>
       </span>
     </div>
     <div class="rail-sep"></div>
@@ -358,10 +358,10 @@ tbody tr.actual.cursor td{box-shadow:inset 3px 0 0 var(--amber)}
       <div class="sync" id="syncWrapper" style="display:none">
         <i class="sync-dot" id="syncDot"></i><span class="sync-text" id="syncText" aria-live="polite">Waiting</span>
       </div>
-      <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Switch theme" aria-label="Switch theme">
+      <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Switch Theme" aria-label="Switch Theme">
         <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
-      <button class="icon-btn" onclick="openSaved()" title="Saved positions" aria-label="Saved positions">
+      <button class="icon-btn" onclick="openSaved()" title="Saved Positions" aria-label="Saved Positions">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
       </button>
       <button class="btn" onclick="askReset()">New</button>
@@ -388,7 +388,7 @@ tbody tr.actual.cursor td{box-shadow:inset 3px 0 0 var(--amber)}
     <div class="faders">
       <div class="fader">
         <div class="fader-head">
-          <span class="eyebrow">Acceptance ratio</span>
+          <span class="eyebrow">Acceptance Ratio</span>
           <div class="fader-val">
             <span class="tag" id="arTag" style="display:none">ACTUAL</span>
             <span class="n num" id="arRead">&mdash;</span>
@@ -400,7 +400,7 @@ tbody tr.actual.cursor td{box-shadow:inset 3px 0 0 var(--amber)}
       </div>
       <div class="fader">
         <div class="fader-head">
-          <span class="eyebrow">Exit &mdash; unaccepted equity</span>
+          <span class="eyebrow">Exit &mdash; Unaccepted Equity</span>
           <input type="number" class="px-input num" id="expectedPostPrice" placeholder="0" oninput="onPriceInput()" aria-label="Exit price for the unaccepted equity">
         </div>
         <input type="range" id="priceSlider" min="0" max="1000" step="1" value="500"
@@ -409,23 +409,23 @@ tbody tr.actual.cursor td{box-shadow:inset 3px 0 0 var(--amber)}
       </div>
       <div class="fader">
         <div class="fader-head">
-          <span class="eyebrow">Exit &mdash; short futures</span>
-          <input type="number" class="px-input num" id="exitFuturesPrice" placeholder="= equity" oninput="onFutExitInput()" aria-label="Exit price for the short futures">
+          <span class="eyebrow">Exit &mdash; Short Futures</span>
+          <input type="number" class="px-input num" id="exitFuturesPrice" placeholder="= Equity" oninput="onFutExitInput()" aria-label="Exit price for the short futures">
         </div>
         <input type="range" id="futSlider" min="0" max="1000" step="1" value="500"
                oninput="onFutSlider(this.value)" aria-label="Futures exit price slider">
-        <div class="fader-scale"><span id="fxMin">&mdash;</span><span id="fxBasis">same as equity</span><span id="fxMax">&mdash;</span></div>
+        <div class="fader-scale"><span id="fxMin">&mdash;</span><span id="fxBasis">Same as Equity</span><span id="fxMax">&mdash;</span></div>
       </div>
     </div>
 
     <div class="readout">
       <div class="ro">
-        <div class="ro-lab">Shares at this ratio</div>
+        <div class="ro-lab">Shares at This Ratio</div>
         <div class="ro-val num" id="roShares">&mdash;</div>
-        <div class="ro-sub" id="roSharesSub">accepted / left with you</div>
+        <div class="ro-sub" id="roSharesSub">Accepted / Left with You</div>
       </div>
       <div class="ro hedge">
-        <div class="ro-lab">Net P&amp;L &mdash; with hedge</div>
+        <div class="ro-lab">Net P&amp;L &mdash; With Hedge</div>
         <div class="ro-val num" id="roHedge">&mdash;</div>
         <div class="ro-sub num" id="roHedgeSub">&mdash;</div>
       </div>
@@ -435,14 +435,14 @@ tbody tr.actual.cursor td{box-shadow:inset 3px 0 0 var(--amber)}
         <div class="ro-sub num" id="roOpenSub">&mdash;</div>
       </div>
       <div class="ro">
-        <div class="ro-lab">Break-even acceptance</div>
+        <div class="ro-lab">Break-even Acceptance</div>
         <div class="ro-val num" id="roBE">&mdash;</div>
         <div class="ro-sub num" id="roBESub">&mdash;</div>
       </div>
       <div class="ro">
-        <div class="ro-lab">What the hedge is worth</div>
+        <div class="ro-lab">What the Hedge Is Worth</div>
         <div class="ro-val num" id="roGap">&mdash;</div>
-        <div class="ro-sub" id="roGapSub">identical at every ratio</div>
+        <div class="ro-sub" id="roGapSub">Identical at Every Ratio</div>
       </div>
     </div>
   </section>
@@ -451,37 +451,37 @@ tbody tr.actual.cursor td{box-shadow:inset 3px 0 0 var(--amber)}
   <div class="work">
 
     <aside class="card panel">
-      <h2 class="grp">Cash position</h2>
+      <h2 class="grp">Cash Position</h2>
       <div class="row2">
         <div class="f"><label for="numAccounts">Accounts</label><input type="number" id="numAccounts" placeholder="0" oninput="calculateAll()"></div>
-        <div class="f"><label for="sharesPerAccount">Shares / acct</label><input type="number" id="sharesPerAccount" placeholder="0" oninput="calculateAll()"></div>
+        <div class="f"><label for="sharesPerAccount">Shares / Acct</label><input type="number" id="sharesPerAccount" placeholder="0" oninput="calculateAll()"></div>
       </div>
-      <div class="f"><label for="buyPrice">Average buy price (&#8377;)</label><input type="number" id="buyPrice" placeholder="0" oninput="calculateAll()"></div>
-      <div class="derived" id="dCash"><b>&mdash;</b> shares held</div>
+      <div class="f"><label for="buyPrice">Average Buy Price (&#8377;)</label><input type="number" id="buyPrice" placeholder="0" oninput="calculateAll()"></div>
+      <div class="derived" id="dCash"><b>&mdash;</b> Shares Held</div>
 
-      <div class="f"><label for="buybackPrice">Buyback offer price (&#8377;)</label><input type="number" id="buybackPrice" placeholder="0" oninput="calculateAll()"></div>
-      <div class="derived" id="dPremium"><b>&mdash;</b> Premium per share</div>
+      <div class="f"><label for="buybackPrice">Buyback Offer Price (&#8377;)</label><input type="number" id="buybackPrice" placeholder="0" oninput="calculateAll()"></div>
+      <div class="derived" id="dPremium"><b>&mdash;</b> Premium Per Share</div>
 
       <div class="f">
-        <label for="manualAccepted">Shares actually accepted</label>
+        <label for="manualAccepted">Shares Actually Accepted</label>
         <input type="number" id="manualAccepted" placeholder="Fill in after the result" oninput="onActualInput()">
       </div>
 
-      <h2 class="grp">Futures hedge</h2>
+      <h2 class="grp">Futures Hedge</h2>
       <div class="row2">
         <div class="f"><label for="expiryMonth">Expiry</label>
           <select id="expiryMonth" onchange="calculateAll()">
             <option>Jan</option><option>Feb</option><option>Mar</option><option>Apr</option><option>May</option><option>Jun</option><option>Jul</option><option>Aug</option><option>Sep</option><option>Oct</option><option>Nov</option><option>Dec</option>
           </select>
         </div>
-        <div class="f"><label for="lotSize">Lot size</label><input type="number" id="lotSize" placeholder="375" oninput="calculateAll()"></div>
+        <div class="f"><label for="lotSize">Lot Size</label><input type="number" id="lotSize" placeholder="375" oninput="calculateAll()"></div>
       </div>
-      <div class="f"><label for="numLots">Lots short</label><input type="number" id="numLots" placeholder="0" oninput="calculateAll()"></div>
-      <div class="f"><label for="futurePrice">Futures short price (&#8377;)</label><input type="number" id="futurePrice" placeholder="0" oninput="calculateAll()"></div>
-      <div class="derived" id="dHedge"><b>&mdash;</b> shorted</div>
+      <div class="f"><label for="numLots">Lots Short</label><input type="number" id="numLots" placeholder="0" oninput="calculateAll()"></div>
+      <div class="f"><label for="futurePrice">Futures Short Price (&#8377;)</label><input type="number" id="futurePrice" placeholder="0" oninput="calculateAll()"></div>
+      <div class="derived" id="dHedge"><b>&mdash;</b> Shorted</div>
 
       <div class="cover">
-        <div class="cover-lab"><span style="color:var(--brass-2)" id="lblHedged">0% hedged</span><span style="color:var(--ink-3)" id="lblOpen">0% open</span></div>
+        <div class="cover-lab"><span style="color:var(--brass-2)" id="lblHedged">0% Hedged</span><span style="color:var(--ink-3)" id="lblOpen">0% Open</span></div>
         <div class="cover-track"><div class="cover-fill" id="hedgeFill" style="width:0%"></div></div>
       </div>
 
@@ -492,7 +492,7 @@ tbody tr.actual.cursor td{box-shadow:inset 3px 0 0 var(--amber)}
       <div class="work-head">
         <div class="tabs" role="tablist">
           <button class="tab" role="tab" aria-selected="true" id="tabL" onclick="showTab('ladder')">Ladder</button>
-          <button class="tab" role="tab" aria-selected="false" id="tabM" onclick="showTab('matrix')">Price matrix</button>
+          <button class="tab" role="tab" aria-selected="false" id="tabM" onclick="showTab('matrix')">Price Matrix</button>
         </div>
         <div class="menu">
           <button class="btn btn-brass" id="expBtn" onclick="toggleMenu(event)" aria-haspopup="true" aria-expanded="false">
@@ -501,7 +501,7 @@ tbody tr.actual.cursor td{box-shadow:inset 3px 0 0 var(--amber)}
           </button>
           <div class="menu-pop" id="expMenu">
             <button class="menu-item" onclick="exportExcel()">
-              <strong>Excel report (.xlsx)</strong>
+              <strong>Excel Report (.xlsx)</strong>
               <span>Three sheets, live formulas, formatted to send as it is</span>
             </button>
             <button class="menu-item" onclick="exportCSV()">
@@ -517,15 +517,15 @@ tbody tr.actual.cursor td{box-shadow:inset 3px 0 0 var(--amber)}
           <table id="scenarioTable">
             <thead>
               <tr>
-                <th colspan="4" class="g" style="text-align:left">The tender</th>
-                <th colspan="2" class="g hedge">With hedge</th>
-                <th colspan="2" class="g">Without hedge</th>
+                <th colspan="4" class="g" style="text-align:left">The Tender</th>
+                <th colspan="2" class="g hedge">With Hedge</th>
+                <th colspan="2" class="g">Without Hedge</th>
               </tr>
               <tr>
                 <th class="lead">Acceptance</th>
                 <th>Accepted</th>
                 <th>Unaccepted</th>
-                <th>Buyback profit</th>
+                <th>Buyback Profit</th>
                 <th class="hedge">Open P&amp;L</th><th class="hedge">Net P&amp;L</th>
                 <th>Open P&amp;L</th><th>Net P&amp;L</th>
               </tr>
@@ -556,9 +556,9 @@ tbody tr.actual.cursor td{box-shadow:inset 3px 0 0 var(--amber)}
 
 <!-- ============ SAVED ============ -->
 <div class="ov" id="savedModal" onclick="if(event.target===this)closeSaved()">
-  <div class="sheet" role="dialog" aria-modal="true" aria-label="Saved positions">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Saved Positions">
     <div class="sheet-head">
-      <h2>Saved positions</h2>
+      <h2>Saved Positions</h2>
       <button class="icon-btn" onclick="closeSaved()" aria-label="Close">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -566,7 +566,7 @@ tbody tr.actual.cursor td{box-shadow:inset 3px 0 0 var(--amber)}
     <div class="sheet-body">
       <div class="search">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--ink-3); flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="savedSearch" placeholder="Search by name" oninput="filterSaved()" autocomplete="off">
+        <input type="text" id="savedSearch" placeholder="Search by Name" oninput="filterSaved()" autocomplete="off">
       </div>
       <div id="savedList"></div>
     </div>
@@ -708,7 +708,7 @@ function breakeven(V, hedged) {
   const z = sc(0, V);
   return -(hedged ? z.netWithHedge : z.netWithoutHedge) / slope / V.totalShares;
 }
-const beText = r => r === null ? '\u2014' : r < 0 ? 'already ahead at 0%' : r > 1 ? 'never at this price' : (r * 100).toFixed(1) + '%';
+const beText = r => r === null ? '\u2014' : r < 0 ? 'Already ahead at 0%' : r > 1 ? 'Never at this price' : (r * 100).toFixed(1) + '%';
 
 /* ==========================================================
    READ INPUTS
@@ -752,25 +752,25 @@ function calculateAll() {
 
   /* derived chips */
   $('dCash').innerHTML = V.totalShares
-    ? `<b>${V.totalShares.toLocaleString('en-IN')}</b> Shares held <span class="sep">/</span> <b>${rupee(V.totalShares * V.buyPrice)}</b> outlay`
-    : '<b>&mdash;</b> Shares held';
+    ? `<b>${V.totalShares.toLocaleString('en-IN')}</b> Shares Held <span class="sep">/</span> <b>${rupee(V.totalShares * V.buyPrice)}</b> Outlay`
+    : '<b>&mdash;</b> Shares Held';
   const prem = V.buybackPrice - V.buyPrice;
   $('dPremium').innerHTML = (V.buybackPrice && V.buyPrice)
-    ? `<b class="${prem >= 0 ? 'up' : 'down'}">${rupee(prem)}</b> premium/share <span class="sep">/</span> <b class="${prem >= 0 ? 'up' : 'down'}">${(prem / V.buyPrice * 100).toFixed(1)}%</b> over cost`
-    : '<b>&mdash;</b> Premium per share';
+    ? `<b class="${prem >= 0 ? 'up' : 'down'}">${rupee(prem)}</b> Premium/Share <span class="sep">/</span> <b class="${prem >= 0 ? 'up' : 'down'}">${(prem / V.buyPrice * 100).toFixed(1)}%</b> Over Cost`
+    : '<b>&mdash;</b> Premium Per Share';
   const spread = V.futurePrice - V.buyPrice;
   $('dHedge').innerHTML = V.futureShares
-    ? `<b>${V.futureShares.toLocaleString('en-IN')}</b> shorted${V.futurePrice ? ` <span class="sep">/</span> <b class="${spread >= 0 ? 'up' : 'down'}">${rupee(spread)}</b> spread/share <span class="sep">/</span> <b>${rupee(V.futureShares * V.futurePrice * 0.25)}</b> margin` : ''}`
-    : '<b>&mdash;</b> shorted';
+    ? `<b>${V.futureShares.toLocaleString('en-IN')}</b> Shorted${V.futurePrice ? ` <span class="sep">/</span> <b class="${spread >= 0 ? 'up' : 'down'}">${rupee(spread)}</b> Spread/Share <span class="sep">/</span> <b>${rupee(V.futureShares * V.futurePrice * 0.25)}</b> Margin` : ''}`
+    : '<b>&mdash;</b> Shorted';
   $('dCapital').innerHTML = V.investment
-    ? `<b>${rupee(V.investment)}</b> Capital Deployed <span class="sep">/</span> cash + 25% margin`
+    ? `<b>${rupee(V.investment)}</b> Capital Deployed <span class="sep">/</span> Cash + 25% Margin`
     : '<b>&mdash;</b> Capital Deployed';
 
   /* coverage bar */
   const pctH = V.totalShares > 0 ? (V.futureShares / V.totalShares) * 100 : 0;
   $('hedgeFill').style.width = Math.min(pctH, 100) + '%';
-  $('lblHedged').textContent = (V.totalShares > 0 ? pctH.toFixed(1) : 0) + '% hedged';
-  $('lblOpen').textContent = (V.totalShares > 0 ? Math.max(100 - pctH, 0).toFixed(1) : 0) + '% open';
+  $('lblHedged').textContent = (V.totalShares > 0 ? pctH.toFixed(1) : 0) + '% Hedged';
+  $('lblOpen').textContent = (V.totalShares > 0 ? Math.max(100 - pctH, 0).toFixed(1) : 0) + '% Open';
 
   syncPriceSliders(V);
   clampAR(V);
@@ -809,15 +809,15 @@ function syncPriceSliders(V) {
   const money = n => '\u20B9' + n.toLocaleString('en-IN');
   ['pxMin', 'fxMin'].forEach(i => $(i).textContent = base ? money(lo) : '\u2014');
   ['pxMax', 'fxMax'].forEach(i => $(i).textContent = base ? money(hi) : '\u2014');
-  $('pxMid').textContent = V.futurePrice ? 'futures at ' + money(V.futurePrice) : '\u2014';
+  $('pxMid').textContent = V.futurePrice ? 'Futures at ' + money(V.futurePrice) : '\u2014';
 
   const fx = $('exitFuturesPrice');
   fx.classList.toggle('inherit', V.futInherited);
-  fx.placeholder = V.cashExit ? '= ' + V.cashExit : '= equity';
+  fx.placeholder = V.cashExit ? '= ' + V.cashExit : '= Equity';
   $('fxBasis').innerHTML = V.futInherited
-    ? 'same as equity'
-    : (V.basis === 0 ? 'no basis' : 'basis ' + (V.basis > 0 ? '+' : '\u2212') + money(Math.abs(V.basis))) +
-      ' \u00B7 <a href="#" onclick="relinkFut();return false" style="color:var(--brass-2); font-weight:700">relink</a>';
+    ? 'Same as Equity'
+    : (V.basis === 0 ? 'No Basis' : 'Basis ' + (V.basis > 0 ? '+' : '\u2212') + money(Math.abs(V.basis))) +
+      ' \u00B7 <a href="#" onclick="relinkFut();return false" style="color:var(--brass-2); font-weight:700">Relink</a>';
 }
 function onPriceSlider(v) { priceDragging = true; $('expectedPostPrice').value = v; calculateAll(); priceDragging = false; }
 function onPriceInput() { calculateAll(); }
@@ -845,20 +845,20 @@ function renderReadout(V) {
   $('arTag').style.display = isAct ? '' : 'none';
 
   $('roShares').textContent = acc.toLocaleString('en-IN') + ' / ' + r.remainingShares.toLocaleString('en-IN');
-  $('roSharesSub').textContent = 'accepted / left with you';
+  $('roSharesSub').textContent = 'Accepted / Left with You';
 
   $('roHedge').textContent = rupee(r.netWithHedge);
   $('roHedge').className = 'ro-val num ' + (r.netWithHedge >= 0 ? 'up' : 'down');
-  $('roHedgeSub').textContent = (r.netWithHedgePct > 0 ? '+' : '') + r.netWithHedgePct + '% on capital';
+  $('roHedgeSub').textContent = (r.netWithHedgePct > 0 ? '+' : '') + r.netWithHedgePct + '% on Capital';
 
   $('roOpen').textContent = rupee(r.netWithoutHedge);
   $('roOpen').className = 'ro-val num ' + (r.netWithoutHedge >= 0 ? 'up' : 'down');
-  $('roOpenSub').textContent = (r.netWithoutHedgePct > 0 ? '+' : '') + r.netWithoutHedgePct + '% on capital';
+  $('roOpenSub').textContent = (r.netWithoutHedgePct > 0 ? '+' : '') + r.netWithoutHedgePct + '% on Capital';
 
   const gap = r.futuresPnL;
   $('roGap').textContent = rupee(gap);
   $('roGap').className = 'ro-val num ' + (gap >= 0 ? 'up' : 'down');
-  $('roGapSub').textContent = V.futureShares ? 'the futures leg, at any ratio' : 'no hedge in place';
+  $('roGapSub').textContent = V.futureShares ? 'The Futures Leg, at Any Ratio' : 'No Hedge in Place';
 
   /* break-even: where the line crosses zero, for both strategies */
   const beH = breakeven(V, true), beN = breakeven(V, false);
@@ -866,8 +866,8 @@ function renderReadout(V) {
   $('roBE').className = 'ro-val num' + (beH !== null && beH >= 0 && beH <= 1 ? '' : ' ro-val-sm');
   /* when the exit price equals the buyback price the line is flat: acceptance
      genuinely changes nothing, so there is no break-even to quote */
-  $('roBESub').textContent = beH === null ? 'acceptance changes nothing at this exit price'
-    : V.futureShares ? beText(beN) + ' without the hedge' : 'no hedge in place';
+  $('roBESub').textContent = beH === null ? 'Acceptance changes nothing at this exit price'
+    : V.futureShares ? beText(beN) + ' without the hedge' : 'No Hedge in Place';
 
   const qty = n => n.toLocaleString('en-IN');
   if (!V.futureShares) {
@@ -1052,7 +1052,7 @@ function renderMatrix(V) {
   body.innerHTML = '';
   OFFSETS.forEach(o => {
     const px = Math.round(V.futurePrice * (1 + o / 100));
-    head.innerHTML += `<th class="${o === 0 ? 'at' : ''}">\u20B9${px.toLocaleString('en-IN')}<small>${o > 0 ? '+' : ''}${o}%${o === 0 ? ' \u2022 futures' : ''}</small></th>`;
+    head.innerHTML += `<th class="${o === 0 ? 'at' : ''}">\u20B9${px.toLocaleString('en-IN')}<small>${o > 0 ? '+' : ''}${o}%${o === 0 ? ' \u2022 Futures' : ''}</small></th>`;
   });
   for (let p = 5; p <= 100; p += 5) {
     const tr = document.createElement('tr');
@@ -1157,7 +1157,7 @@ window.BuybackReport = (function (ExcelJS) {
   const brass = { style: 'medium', color: { argb: BRASS } };
   const fill  = argb => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } });
   const F = 'Calibri';
-  const BRAND = 'by Raksh';
+  const BRAND = 'By Raksh';
 
   /* ---------- the model ----------------------------------------------------
      Net P&L = buyback profit + equity P&L on what is left + futures P&L.
